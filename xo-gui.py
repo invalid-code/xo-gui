@@ -6,8 +6,9 @@ import PySimpleGUI as sg
 
 sg.theme("dark grey")
 
+
 class Player:
-    def __init__(self, player_avatar:str, is_player_opponent:str):
+    def __init__(self, player_avatar: str, is_player_opponent: str):
         self.player = player_avatar
         self.is_player_opponent = is_player_opponent
 
@@ -17,7 +18,6 @@ class Player:
             return True
         return False
 
-    
     def __repr__(self):
         return f"Player(player={self.player}, is_player_opponent={self.is_player_opponent})"
 
@@ -27,33 +27,28 @@ class Player:
 
 class PlayerA(Player):
     pass
-    
 
 
 class PlayerB(Player):
     def play(self, game):
-        # temporary
         ind = ""
+        # temporary
         for key, cell in game.table.items():
             if not cell:
                 game.table[key] = self.player
-                return True
-        # if game.check_cell(ind):
-        #     game.table[ind] = self.player
-        #     return True
-        # return False
+                return {"has_played": True, "cell": key}
 
 
 class Game:
-    # BUG fix not being able play when player is second
     xo = ("X", "O")
 
-    def __init__(self, player=PlayerA, opponent=PlayerB):
+    def __init__(self):
         self.player_avatar = rd.choice(Game.xo)
-        self.player = player(self.player_avatar, "player")
-        self.opponent = opponent("X", "opponent")
+        self.player = PlayerA(self.player_avatar, "player")
         if self.player_avatar == "X":
-            self.opponent = opponent("O", "opponent")
+            self.opponent = PlayerB("O", "opponent")
+        else:
+            self.opponent = PlayerB("X", "opponent")
         self.first = rd.choice(Game.xo)
         self.table = {
             "1": "",
@@ -66,8 +61,8 @@ class Game:
             "8": "",
             "9": "",
         }
-    
-    def get_cell_value(self, ind:str): 
+
+    def get_cell_value(self, ind: str):
         return self.table.get(ind)
 
     def is_player_first(self):
@@ -75,7 +70,7 @@ class Game:
             return True
         return False
 
-    def finished_game(self):
+    def finished_game(self, window):
         """To check if all cells are filled"""
 
         for cell in self.table.values():
@@ -83,6 +78,8 @@ class Game:
             if cell not in Game.xo:  # if a cell has no value return true
                 return True
 
+        window["-POPUP-"].update("Tie")
+        window["-RETRY-"].update(visible=True)
         return False
 
     def check_cell(self, ind: str):
@@ -90,17 +87,13 @@ class Game:
 
         if self.table.get(ind) not in Game.xo:
             return True
-
         return False
 
-    def check_winner(self):
-        
-        # TODO check if opponent won
+    def check_winner(self, window):
         player = self.player
         opponent = self.opponent
-        status = {"is_winner": ""}
 
-        def check_one(status:dict[str,str]=status, player=player, opponent=opponent):
+        def check_one(player=player, opponent=opponent, window=window):
             one = 1
 
             if (
@@ -108,20 +101,56 @@ class Game:
                 and self.table.get(str(one + 1)) == player.player
                 and self.table.get(str(one + 2)) == player.player
             ):
-                status.update({"is_winner": "win", "player": player.player})
-                return status
+                # check table cell 1 - 3
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
             if (
                 self.table.get(str(one)) == player.player
                 and self.table.get(str(one + 3)) == player.player
                 and self.table.get(str(one + 6)) == player.player
             ):
-                status.update({"is_winner": "win", "player": player.player})
-                return status
+                # check table cell 1 - 9
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
-            return status
+            if (
+                self.table.get(str(one)) == player.player
+                and self.table.get(str(one + 4)) == player.player
+                and self.table.get(str(one + 8)) == player.player
+            ):
+                # check table cell 1 - 7
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
-        def check_nine(status:dict[str,str]=status, player=player, opponent=opponent):
+            if (
+                self.table.get(str(one)) == opponent.player
+                and self.table.get(str(one + 1)) == opponent.player
+                and self.table.get(str(one + 2)) == opponent.player
+            ):
+                # check table cell 1 - 3
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
+
+            if (
+                self.table.get(str(one)) == opponent.player
+                and self.table.get(str(one + 3)) == opponent.player
+                and self.table.get(str(one + 6)) == opponent.player
+            ):
+                # check table cell 1 - 9
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
+
+            if (
+                self.table.get(str(one)) == opponent.player
+                and self.table.get(str(one + 4)) == opponent.player
+                and self.table.get(str(one + 8)) == opponent.player
+            ):
+                # check table cell 1 - 7
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
+
+        def check_nine(player=player, opponent=opponent, window=window):
             nine = 9
 
             if (
@@ -129,49 +158,111 @@ class Game:
                 and self.table.get(str(nine - 1)) == player.player
                 and self.table.get(str(nine - 2)) == player.player
             ):
-                status.update({"is_winner": "win", "player": player.player})
-                return status
+                # check table cell 7 - 9
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
             if (
                 self.table.get(str(nine)) == player.player
                 and self.table.get(str(nine - 3)) == player.player
                 and self.table.get(str(nine - 6)) == player.player
             ):
-                status.update({"is_winner": "win", "player": player.player})
-                return status
+                # check table cell 3 - 9
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
-            return status
+            if (
+                self.table.get(str(nine)) == opponent.player
+                and self.table.get(str(nine - 1)) == opponent.player
+                and self.table.get(str(nine - 2)) == opponent.player
+            ):
+                # check table cell 7 - 9
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
 
-        def check_five(status:dict[str,str]=status, player=player, opponent=opponent):
-            pass
+            if (
+                self.table.get(str(nine)) == opponent.player
+                and self.table.get(str(nine - 3)) == opponent.player
+                and self.table.get(str(nine - 6)) == opponent.player
+            ):
+                # check table cell 3 - 9
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
 
-        one = check_one()
-        if one.get("is_winner"):
-            return one
+        def check_five(player=player, opponent=opponent, window=window):
+            five = 5
 
-        # five = check_five()
-        # if five.get("is_winner"):
-        #     return five
+            if (
+                self.table.get(str(five)) == player.player
+                and self.table.get(str(five - 3)) == player.player
+                and self.table.get(str(five + 3)) == player.player
+            ):
+                # check table cell 2 - 8
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
-        nine = check_nine()
-        if nine.get("is_winner"):
-            return nine
+            if (
+                self.table.get(str(five)) == player.player
+                and self.table.get(str(five - 1)) == player.player
+                and self.table.get(str(five + 1)) == player.player
+            ):
+                # check table cell 4 - 6
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
 
-        return status
+            if (
+                self.table.get(str(five)) == player.player
+                and self.table.get(str(five - 2)) == player.player
+                and self.table.get(str(five + 2)) == player.player
+            ):
+                # check table cell 3 - 9
+                window["-POPUP-"].update("You win")
+                window["-RETRY-"].update(visible=True)
+
+            if (
+                self.table.get(str(five)) == opponent.player
+                and self.table.get(str(five - 3)) == opponent.player
+                and self.table.get(str(five + 3)) == opponent.player
+            ):
+                # check table cell 2 - 8
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
+
+            if (
+                self.table.get(str(five)) == opponent.player
+                and self.table.get(str(five - 1)) == opponent.player
+                and self.table.get(str(five + 1)) == opponent.player
+            ):
+                # check table cell 4 - 6
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
+
+            if (
+                self.table.get(str(five)) == opponent.player
+                and self.table.get(str(five - 2)) == opponent.player
+                and self.table.get(str(five + 2)) == opponent.player
+            ):
+                # check table cell 3 - 9
+                window["-POPUP-"].update("You lose")
+                window["-RETRY-"].update(visible=True)
+
+        check_one()
+        check_five()
+        check_nine()
+        # window["-POPUP-"].update("Tie")
+        # window["-RETRY-"].update(visible=True)
 
     def __repr__(self):
-        return f"Game(player_avatar={self.player_avatar}, player={self.player}, opponent={self.opponent}, first={self.first}, table={self.table})"
+        return f"Game(player_avatar={self.player_avatar}, player={self.player.__repr__()}, opponent={self.opponent.__repr__()}, first={self.first}, table={self.table})"
 
     def __str__(self):
         return f"the player's avatar will be {self.player_avatar}\nplayer will be {self.player}\nopponent will be {self.opponent}\n {self.player if self.first else self.opponent}\n {self.table} will be playing field"
 
+
 def main():
+    # BUG buggy when going second
     game = Game()
-    # is_first = game.is_player_first()
-    # player = Player(is_first)
-    # opponent = Opponent(player, is_first)
-    print(game.__repr__())
-    print(game.__str__())
+    game_winner = game.check_winner
 
     layout = [
         [sg.Text(f"You'll be {game.player.player}.")],
@@ -219,7 +310,7 @@ def main():
                         )
                     ],
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [   
+                    [
                         sg.Text(
                             game.table.get("5"),
                             key="-CELL5-",
@@ -278,18 +369,62 @@ def main():
 
     while True:
         event, values = window.read()
-        game_winner = game.check_winner
 
         if event == sg.WIN_CLOSED:
             break
 
-        # if event == "-RETRY-":
+            # if event == "-RETRY-":
             game = Game()
             window.refresh
 
-        if not game_winner().get("is_winner"):
-            if game.finished_game():
-                if game.is_player_first():
+        game_winner(window)
+        if game.finished_game(window):
+            if game.is_player_first():
+                if event == "-CELL1-":
+                    if game.player.play("1", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL2-":
+                    if game.player.play("2", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL3-":
+                    if game.player.play("3", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL4-":
+                    if game.player.play("4", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL5-":
+                    if game.player.play("5", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL6-":
+                    if game.player.play("6", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL7-":
+                    if game.player.play("7", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL8-":
+                    if game.player.play("8", game):
+                        window[event].update(game.player.player)
+                if event == "-CELL9-":
+                    if game.player.play("9", game):
+                        window[event].update(game.player.player)
+
+                game_winner(window)
+                if game.finished_game(window):
+                    play_opponent = game.opponent.play(game, window)
+                    # if play_opponent.get("has_played"):
+                    #     window[f"-CELL{play_opponent.get('cell')}-"].update(
+                    #         game.opponent.player
+                    #     )
+            else:
+                play_opponent = game.opponent.play(game)
+                if play_opponent.get("has_played"):
+                    window[f"-CELL{play_opponent.get('cell')}-"].update(
+                        game.opponent.player
+                    )
+                    window.refresh()
+
+                game_winner(window)
+                if game.finished_game(window):
                     if event == "-CELL1-":
                         if game.player.play("1", game):
                             window[event].update(game.player.player)
@@ -318,25 +453,7 @@ def main():
                         if game.player.play("9", game):
                             window[event].update(game.player.player)
 
-                    # play_opponent = opponent.play(game)
-                    # print(play_opponent)
-                    # if play_opponent.get("has_played"):
-                    #     window[play_opponent.get("cell")].update(opponent.opponent)
-
-                # if opponent.is_first:
-                #     pass
-
-        if game_winner().get("is_winner") == "win":
-            window["-POPUP-"].update("You win")
-            window["-RETRY-"].update(visible=True)
-
-        if game_winner().get("is_winner") == "lose":
-            window["-POPUP-"].update("You lose")
-            window["-RETRY-"].update(visible=True)
-
-        if game_winner().get("is_winner") == "tie":
-            window["-POPUP-"].update("Tie")
-            window["-RETRY-"].update(visible=True)
+        game_winner(window)
 
     window.close()
 
