@@ -6,11 +6,25 @@ import PySimpleGUI as sg
 
 sg.theme("dark grey")
 
+def minimax(game):
+    decision_tree = []
+    if game.check_winner().get("winner") == "player":
+        return { "score": -1 }
+    if not game.finished_game():
+        return { "score": 0}
+    if game.check_winner().get("winner") == "opponent":
+        return { "score": 1 }
+    for key, cell in game.table.items():
+        if game.check_cell(cell): # if cell is empty
+            game.table.update({key: game.opponent.player})
+            decision_tree.append([game.table])
+            minimax(game)
+
 
 class Player:
     def __init__(self, player_avatar: str, is_player_opponent: str):
         self.player = player_avatar
-        self.is_player_opponent = is_player_opponent
+        self.is_player_opponent = is_player_opponent # to know who is the player and the opponent(ai)
 
     def __repr__(self):
         return f"Player(player={self.player}, is_player_opponent={self.is_player_opponent})"
@@ -29,14 +43,7 @@ class PlayerA(Player):
 
 class PlayerB(Player):
     def play(self, game, window: sg.Window):
-        # temporary
-        for key, cell in game.table.items():
-            if not cell:
-                game.table[key] = self.player
-                print(game.table)
-                window[f"-CELL{key}-"].update(self.player)
-                window.refresh()
-                break
+        minimax(game)
 
 
 class Game:
@@ -263,6 +270,8 @@ def main():
     # BUG buggy when going second
     game = Game()
     game_winner = game.check_winner
+    print(game.player.__repr__())
+    print(game.opponent.__repr__())
 
     layout = [
         [sg.Text(f"You'll be {game.player.player}.")],
@@ -368,9 +377,7 @@ def main():
     window = sg.Window(title="xo", layout=layout, margins=[25, 25], size=[800, 500], finalize=True)
 
     while True:
-        print(game.finished_game(window))
         event, values = window.read()
-        print(event, values)
 
         if event == sg.WIN_CLOSED:
             break
@@ -379,7 +386,6 @@ def main():
             game = Game()
             window.refresh
 
-        print(game.finished_game(window))
         if game.finished_game(window):
 
             game_winner(window)
