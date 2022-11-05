@@ -12,12 +12,6 @@ class Player:
         self.player = player_avatar
         self.is_player_opponent = is_player_opponent
 
-    def play(self, ind: str, game):
-        if game.check_cell(ind):
-            game.table[ind] = self.player
-            return True
-        return False
-
     def __repr__(self):
         return f"Player(player={self.player}, is_player_opponent={self.is_player_opponent})"
 
@@ -26,17 +20,23 @@ class Player:
 
 
 class PlayerA(Player):
-    pass
+    def play(self, game, window: sg.Window, event: str):
+        ind = event[5]
+        if event[1:5] == "CELL":
+            game.table[ind] = self.player
+            window[f"-CELL{ind}-"].update(self.player)
 
 
 class PlayerB(Player):
-    def play(self, game):
-        ind = ""
+    def play(self, game, window: sg.Window):
         # temporary
         for key, cell in game.table.items():
             if not cell:
                 game.table[key] = self.player
-                return {"has_played": True, "cell": key}
+                print(game.table)
+                window[f"-CELL{key}-"].update(self.player)
+                window.refresh()
+                break
 
 
 class Game:
@@ -62,6 +62,12 @@ class Game:
             "9": "",
         }
 
+    def __repr__(self):
+        return f"Game(player_avatar={self.player_avatar}, player={self.player.__repr__()}, opponent={self.opponent.__repr__()}, first={self.first}, table={self.table})"
+
+    def __str__(self):
+        return f"the player's avatar will be {self.player_avatar}\nplayer will be {self.player}\nopponent will be {self.opponent}\n {self.player if self.first else self.opponent}\n {self.table} will be playing field"
+
     def get_cell_value(self, ind: str):
         return self.table.get(ind)
 
@@ -70,7 +76,7 @@ class Game:
             return True
         return False
 
-    def finished_game(self, window):
+    def finished_game(self, window: sg.Window):
         """To check if all cells are filled"""
 
         for cell in self.table.values():
@@ -89,7 +95,7 @@ class Game:
             return True
         return False
 
-    def check_winner(self, window):
+    def check_winner(self, window: sg.Window):
         player = self.player
         opponent = self.opponent
 
@@ -252,12 +258,6 @@ class Game:
         # window["-POPUP-"].update("Tie")
         # window["-RETRY-"].update(visible=True)
 
-    def __repr__(self):
-        return f"Game(player_avatar={self.player_avatar}, player={self.player.__repr__()}, opponent={self.opponent.__repr__()}, first={self.first}, table={self.table})"
-
-    def __str__(self):
-        return f"the player's avatar will be {self.player_avatar}\nplayer will be {self.player}\nopponent will be {self.opponent}\n {self.player if self.first else self.opponent}\n {self.table} will be playing field"
-
 
 def main():
     # BUG buggy when going second
@@ -365,95 +365,42 @@ def main():
         [sg.Button("Retry", k="-RETRY-", visible=False, enable_events=True)],
     ]
 
-    window = sg.Window(title="xo", layout=layout, margins=[25, 25], size=[800, 500])
+    window = sg.Window(title="xo", layout=layout, margins=[25, 25], size=[800, 500], finalize=True)
 
     while True:
+        print(game.finished_game(window))
         event, values = window.read()
+        print(event, values)
 
         if event == sg.WIN_CLOSED:
             break
 
-            # if event == "-RETRY-":
+        # if event == "-RETRY-":
             game = Game()
             window.refresh
 
-        game_winner(window)
+        print(game.finished_game(window))
         if game.finished_game(window):
+
+            game_winner(window)
+
             if game.is_player_first():
-                if event == "-CELL1-":
-                    if game.player.play("1", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL2-":
-                    if game.player.play("2", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL3-":
-                    if game.player.play("3", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL4-":
-                    if game.player.play("4", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL5-":
-                    if game.player.play("5", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL6-":
-                    if game.player.play("6", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL7-":
-                    if game.player.play("7", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL8-":
-                    if game.player.play("8", game):
-                        window[event].update(game.player.player)
-                if event == "-CELL9-":
-                    if game.player.play("9", game):
-                        window[event].update(game.player.player)
+
+                game.player.play(game, window, event)
 
                 game_winner(window)
                 if game.finished_game(window):
-                    play_opponent = game.opponent.play(game, window)
-                    # if play_opponent.get("has_played"):
-                    #     window[f"-CELL{play_opponent.get('cell')}-"].update(
-                    #         game.opponent.player
-                    #     )
+                    game.opponent.play(game, window)
+
             else:
-                play_opponent = game.opponent.play(game)
-                if play_opponent.get("has_played"):
-                    window[f"-CELL{play_opponent.get('cell')}-"].update(
-                        game.opponent.player
-                    )
-                    window.refresh()
+
+                game.opponent.play(game, window)
 
                 game_winner(window)
                 if game.finished_game(window):
-                    if event == "-CELL1-":
-                        if game.player.play("1", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL2-":
-                        if game.player.play("2", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL3-":
-                        if game.player.play("3", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL4-":
-                        if game.player.play("4", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL5-":
-                        if game.player.play("5", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL6-":
-                        if game.player.play("6", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL7-":
-                        if game.player.play("7", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL8-":
-                        if game.player.play("8", game):
-                            window[event].update(game.player.player)
-                    if event == "-CELL9-":
-                        if game.player.play("9", game):
-                            window[event].update(game.player.player)
+                    game.player.play(game, window, event)
 
-        game_winner(window)
+            game_winner(window)
 
     window.close()
 
