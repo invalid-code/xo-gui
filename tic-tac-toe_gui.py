@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import random as rd
-import copy as cp
-from back import Game
+from back import Tic_Tac_Toe
 
 import PySimpleGUI as sg
 
@@ -11,18 +9,17 @@ sg.theme("dark grey")
 
 def main():
     # BUG buggy when going second
-    game = Game()
-    game_winner = game.check_winner
+    game = Tic_Tac_Toe()
 
     layout = [
         [sg.Text(f"You'll be {game.player.player}.")],
-        [sg.Text(f"You'll be {'first' if game.is_player_first() else 'second'}.")],
+        [sg.Text(f"You'll be {'first' if game.first_mover() else 'second'}.")],
         [
             sg.Column(
                 [
                     [
                         sg.Text(
-                            game.table.get("1"),
+                            text=game.table.get("1"),
                             key="-CELL1-",
                             enable_events=True,
                             size=[1, 1],
@@ -31,7 +28,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            game.table.get("4"),
+                            text=game.table.get("4"),
                             key="-CELL4-",
                             enable_events=True,
                             size=[1, 1],
@@ -40,7 +37,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            game.table.get("7"),
+                            text=game.table.get("7"),
                             key="-CELL7-",
                             enable_events=True,
                             size=[1, 1],
@@ -53,7 +50,7 @@ def main():
                 [
                     [
                         sg.Text(
-                            game.table.get("2"),
+                            text=game.table.get("2"),
                             key="-CELL2-",
                             enable_events=True,
                             size=[1, 1],
@@ -62,7 +59,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            game.table.get("5"),
+                            text=game.table.get("5"),
                             key="-CELL5-",
                             enable_events=True,
                             size=[1, 1],
@@ -71,7 +68,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            game.table.get("8"),
+                            text=game.table.get("8"),
                             key="-CELL8-",
                             enable_events=True,
                             size=[1, 1],
@@ -84,7 +81,7 @@ def main():
                 [
                     [
                         sg.Text(
-                            game.table.get("3"),
+                            text=game.table.get("3"),
                             key="-CELL3-",
                             enable_events=True,
                             size=[1, 1],
@@ -93,7 +90,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            game.table.get("6"),
+                            text=game.table.get("6"),
                             key="-CELL6-",
                             enable_events=True,
                             size=[1, 1],
@@ -102,7 +99,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            game.table.get("9"),
+                            text=game.table.get("9"),
                             key="-CELL9-",
                             enable_events=True,
                             size=[1, 1],
@@ -126,30 +123,34 @@ def main():
             break
 
             # if event == "-RETRY-":
-            game = Game()
+            game = Tic_Tac_Toe()
             window.refresh
 
-        if game.finished_game(window):
+        if game.tie(window):
 
-            game_winner(window)
+            game.win(window)
+            game.lose(window)
 
-            if game.is_player_first():
+            if game.first_mover():
 
                 game.player.play(game, window, event)
 
-                game_winner(window)
-                if game.finished_game(window):
+                game.win(window)
+                game.lose(window)
+                if game.tie(window):
                     game.opponent.play(game, window)
 
             else:
 
                 game.opponent.play(game, window)
 
-                game_winner(window)
-                if game.finished_game(window):
+                game.win(window)
+                game.lose(window)
+                if game.tie(window):
                     game.player.play(game, window, event)
 
-            game_winner(window)
+            game.win(window)
+            game.lose(window)
 
     window.close()
 
