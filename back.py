@@ -77,9 +77,19 @@ class Tic_Tac_Toe:
 
     def format(self) -> None:
         """log to console the current board state"""
+        print()
         print(
-            f"{self.table.get('1') if self.table.get('1') else ' ' }|{self.table.get('2') if self.table.get('2') else ' ' }|{self.table.get('3') if self.table.get('3') else ' ' }\n- - -\n{self.table.get('4') if self.table.get('4') else ' ' }|{self.table.get('5') if self.table.get('5') else ' ' }|{self.table.get('6') if self.table.get('6') else ' ' }\n- - -\n{self.table.get('7') if self.table.get('7') else ' ' }|{self.table.get('8') if self.table.get('8') else ' ' }|{self.table.get('9') if self.table.get('9') else ' ' }\n"
+            f"{self.table.get('1') if self.table.get('1') else ' ' }|{self.table.get('2') if self.table.get('2') else ' ' }|{self.table.get('3') if self.table.get('3') else ' ' }"
         )
+        print("- - -")
+        print(
+            f"{self.table.get('4') if self.table.get('4') else ' ' }|{self.table.get('5') if self.table.get('5') else ' ' }|{self.table.get('6') if self.table.get('6') else ' ' }"
+        )
+        print("- - -")
+        print(
+            f"{self.table.get('7') if self.table.get('7') else ' ' }|{self.table.get('8') if self.table.get('8') else ' ' }|{self.table.get('9') if self.table.get('9') else ' ' }"
+        )
+        print()
 
     def first_mover(self) -> str:
         return (
@@ -187,20 +197,31 @@ class Tic_Tac_Toe:
 
 
 def minimax(game: Tic_Tac_Toe, depth=0):
+    if game.win():
+        print(-1, "you win")
+    if game.lose():
+        print(1, "you lose")
+    if game.tie():
+        print(0, "tie")
+
+    opponent_row:list[Tic_Tac_Toe] = []
+    player_row:list[Tic_Tac_Toe] = []
     for key in game.table.keys():
         game_copy = cp.deepcopy(game)
         if game_copy.cell(key):
             if game_copy.turn_ == game_copy.opponent.name:
                 game_copy.set_cell(**{key: game_copy.opponent.player})
-                game_copy.turn(game_copy.player.name)
+                game_copy.turn(game_copy.player.player)
+                game_copy.format()
+                opponent_row.append(game_copy)
             else:
                 game_copy.set_cell(**{key: game_copy.player.player})
-                game_copy.turn(game_copy.opponent.name)
-            game_copy.format()
-            if game_copy.win():
-                return
-            if game_copy.lose():
-                return
-            if game_copy.tie():
-                return 0
-            minimax(game_copy)
+                game_copy.turn(game_copy.opponent.player)
+                game_copy.format()
+                player_row.append(game_copy)
+    if game.turn_ == game.opponent.name:
+        for branch in opponent_row:
+            minimax(branch)
+    else:
+        for branch in player_row:
+            minimax(branch)

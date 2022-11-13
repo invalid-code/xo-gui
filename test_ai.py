@@ -9,7 +9,10 @@ def test():
     # inialization done
     
     # test inialization
+    print("player: ", game.player.player)
+    print("opponent: ", game.opponent.player)
     game.format()
+    print("-----------------------------------")
 
     # testing
     minimax(game)
