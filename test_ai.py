@@ -1,9 +1,9 @@
-from back import minimax, Branch
+from back import minimax, Tic_Tac_Toe
 
 
 def test():
     # inialization
-    game = Branch(0)
+    game = Tic_Tac_Toe()
     game.set_cell(**{"1": "O", "3": "X", "4": "X", "6": "X", "8": "O", "9": "O"})
     game.turn(game.opponent.name)
     # inialization done

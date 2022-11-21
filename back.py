@@ -1,4 +1,5 @@
 import random as rd
+import copy as cp
 import PySimpleGUI as sg
 
 
@@ -58,7 +59,7 @@ class Tic_Tac_Toe:
         }
 
     def __repr__(self) -> str:
-        return f"Tic_Tac_Toe(player_avatar={self.player_avatar}, player={self.player.__repr__()}, opponent={self.opponent.__repr__()}, first={self.first}, table={self.table})"
+        return f"Tic_Tac_Toe(player_avatar={self.player_avatar}, player={self.player.__repr__()}, opponent={self.opponent.__repr__()}, first={self.first}, turn={self.turn_},table={self.table})"
 
     def __str__(self) -> str:
         return f"the player's avatar will be {self.player_avatar}\nplayer will be {self.player}\nopponent will be {self.opponent}\n {self.player if self.first else self.opponent}\n {self.table} will be playing field"
@@ -195,67 +196,71 @@ class Tic_Tac_Toe:
         )
 
 
-class Branch(Tic_Tac_Toe):
-    def __init__(self, game=None):
-        super().__init__()
-        self.table = game.table if game else None
-        self.branch_no = 0
-        self.score = None
+class Decision_Tree:
+    def __init__(self, root_node: Tic_Tac_Toe) -> None:
+        self.decision_tree = {}
         self.tree_row = 0
+        if len(self.decision_tree) == 0:
+            self.update_decision_tree(root_node)
 
-    def get_branch_no(self) -> None:
-        print("branch number:", self.branch_no)
-        return self.branch_no
-
-    def get_tree_row(self):
-        print("tree row:", self.tree_row)
-        return self.tree_row
-
-    def get_branch_score(self):
-        print("branch score:", self.score)
-        return self.score
+    def update_decision_tree(self, branches: list | Tic_Tac_Toe):
+        if isinstance(branches, list):
+            self.add_tree_row()
+        self.decision_tree.update({self.tree_row: branches})
 
     def add_tree_row(self):
         self.tree_row += 1
-    
-    def add_tree_row(self):
-        self.branch_no += 1
-    
 
 
 def minimax(
-    game: Branch,
+    game: Tic_Tac_Toe,
     depth=0,
+    decision_tree: Decision_Tree | None = None,
+    branch_no: int = 0,
 ):
-    # TODO figure out where to append game state
-    opponent_row: list[Branch] = []
-    player_row: list[Branch] = []
+    # not yet done with this
+    if decision_tree is None:
+        decision_tree = Decision_Tree(game)
 
     if game.win():
-        return
+        return 1
     if game.lose():
-        return
+        return -1
     if game.tie():
-        return
+        return 0
+
+    opponent_row: dict[int, Tic_Tac_Toe] = {}
+    player_row: dict[int, Tic_Tac_Toe] = {}
+
+    branch_no_ = 0
 
     for key in game.table.keys():
-        game_copy = Branch(game=game)
+        game_copy = cp.deepcopy(game)
         if game_copy.cell(key):
             if game_copy.turn_ == game_copy.opponent.name:
                 game_copy.set_cell(**{key: game_copy.opponent.player})
-                game_copy.turn(game_copy.player.player)
-                opponent_row.append(game_copy)
+                game_copy.turn(game_copy.player.name)
+                if branch_no == 0:
+                    branch_no_ += 1
+                    opponent_row.update({branch_no_: game_copy})
+                else:
+                    opponent_row.update({branch_no: game_copy})
             else:
                 game_copy.set_cell(**{key: game_copy.player.player})
-                game_copy.turn(game_copy.opponent.player)
-                player_row.append(game_copy)
-            game.format()
-
+                game_copy.turn(game_copy.opponent.name)
+                if branch_no == 0:
+                    branch_no_ += 1
+                    player_row.update({branch_no_: game_copy})
+                else:
+                    player_row.update({branch_no: game_copy})
+    
     if game.turn_ == game.opponent.name:
-        for branch in opponent_row:
-            if isinstance(branch, Branch):
-                minimax(branch)
+        decision_tree.update_decision_tree(opponent_row)
+        for branch_no, branch in opponent_row.items():
+            print(branch_no)
+            minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
     else:
-        for branch in player_row:
-            if isinstance(branch, Branch):
-                minimax(branch)
+        decision_tree.update_decision_tree(player_row)
+        for branch_no, branch in player_row.items():
+            print(branch_no)
+            minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
