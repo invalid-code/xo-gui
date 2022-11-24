@@ -125,7 +125,7 @@ class Tic_Tac_Toe:
                 and self.get_cell(str(1 + 8)) == self.player.player
             )
             or (
-                self.get_cell(str(9)) == self.player
+                self.get_cell(str(9)) == self.player.player
                 and self.get_cell(str(9 - 1)) == self.player.player
                 and self.get_cell(str(9 - 2)) == self.player.player
             )
@@ -154,7 +154,7 @@ class Tic_Tac_Toe:
     def lose(self) -> bool:
         return (
             (
-                self.table.get(str(1)) == self.opponent.player
+                self.get_cell(str(1)) == self.opponent.player
                 and self.get_cell(str(1 + 1)) == self.opponent.player
                 and self.get_cell(str(1 + 2)) == self.opponent.player
             )
@@ -198,19 +198,26 @@ class Tic_Tac_Toe:
 
 class Decision_Tree:
     def __init__(self, root_node: Tic_Tac_Toe) -> None:
-        self.decision_tree = {}
+        self.decision_tree:dict = {}
         self.tree_row = 0
         if len(self.decision_tree) == 0:
             self.update_decision_tree(root_node)
 
     def update_decision_tree(self, branches: list | Tic_Tac_Toe):
-        if isinstance(branches, list):
+        if isinstance(branches, dict):
             self.add_tree_row()
         self.decision_tree.update({self.tree_row: branches})
 
     def add_tree_row(self):
         self.tree_row += 1
 
+    def update_branch_score(self):
+        return
+
+    def find_branch(self, branch:Tic_Tac_Toe):
+        for branch_no, decision_tree_branch in self.decision_tree.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+            if decision_tree_branch == branch:
+                return branch_no
 
 def minimax(
     game: Tic_Tac_Toe,
@@ -218,25 +225,24 @@ def minimax(
     decision_tree: Decision_Tree | None = None,
     branch_no: int = 0,
 ):
-    # not yet done with this
+    # TODO if we score change decision tree 
     if decision_tree is None:
         decision_tree = Decision_Tree(game)
 
     if game.win():
         return 1
-    if game.lose():
+    elif game.lose():
         return -1
-    if game.tie():
+    elif game.tie():
         return 0
 
     opponent_row: dict[int, Tic_Tac_Toe] = {}
     player_row: dict[int, Tic_Tac_Toe] = {}
-
     branch_no_ = 0
 
     for key in game.table.keys():
-        game_copy = cp.deepcopy(game)
-        if game_copy.cell(key):
+        if game.cell(key):
+            game_copy = cp.deepcopy(game)
             if game_copy.turn_ == game_copy.opponent.name:
                 game_copy.set_cell(**{key: game_copy.opponent.player})
                 game_copy.turn(game_copy.player.name)
@@ -253,14 +259,24 @@ def minimax(
                     player_row.update({branch_no_: game_copy})
                 else:
                     player_row.update({branch_no: game_copy})
-    
+            game_copy.format()
+            
+
     if game.turn_ == game.opponent.name:
         decision_tree.update_decision_tree(opponent_row)
         for branch_no, branch in opponent_row.items():
-            print(branch_no)
-            minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
+            score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
+            if score:
+                find_branch_decision = decision_tree.find_branch(branch)
+                print(game.turn_)
+                print(find_branch_decision)
+                print(score)
     else:
         decision_tree.update_decision_tree(player_row)
         for branch_no, branch in player_row.items():
-            print(branch_no)
-            minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
+            score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
+            if score:
+                find_branch_decision = decision_tree.find_branch(branch)
+                print(game.turn_)
+                print(find_branch_decision)
+                print(score)
