@@ -1,5 +1,5 @@
 import copy as cp
-from back import Tic_Tac_Toe
+from back import Tic_Tac_Toe, Decision_Tree
 
 
 def test_win_met():
@@ -78,6 +78,26 @@ def test_win_met():
     except Exception as exc:
         print(exc)
 
+def test_find_branch_decision_tree():
+    # initialization
+    game = Tic_Tac_Toe()
+    game.set_cell(**{"1": game.player.player, "2": game.player.player})
+    game.turn(game.player.name)
+    decision_tree = Decision_Tree(game)
+    for branch in range(3, 6):
+            game_cp = cp.deepcopy(game)
+            game_cp.set_cell(**{str(branch):game_cp.player.player})
+            decision_tree.update_decision_tree({branch:game_cp})
+
+    try:
+        branch = cp.deepcopy(game)
+        branch.set_cell(**{"1": branch.player.player, "2": branch.player.player, "5": branch.player.player})
+        found_branch = decision_tree.find_branch(branch)
+        print(found_branch)
+    except Exception as exc:
+        print(exc)
+
 
 if __name__ == "__main__":
-    test_win_met()
+    # test_win_met()
+    test_find_branch_decision_tree()

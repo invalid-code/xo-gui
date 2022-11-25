@@ -1,6 +1,9 @@
 import random as rd
 import copy as cp
-import PySimpleGUI as sg
+
+# import PySimpleGUI as sg
+from typing import ClassVar
+from dataclasses import dataclass
 
 
 class Player:
@@ -31,38 +34,29 @@ class PlayerB(Player):
         move = minimax(self.game)
 
 
+@dataclass
 class Tic_Tac_Toe:
-    xo = ("X", "O")
-
-    def __init__(self):
-        self.player_avatar: str = rd.choice(Tic_Tac_Toe.xo)
-        self.player = PlayerA(self, self.player_avatar, "player")
-        self.opponent = (
-            PlayerB(self, "O", "opponent")
-            if self.player_avatar == "X"
-            else PlayerB(self, "X", "opponent")
-        )
-        self.first = rd.choice(Tic_Tac_Toe.xo)
-        self.turn_ = (
-            self.player.name if self.first == self.player.player else self.opponent.name
-        )
-        self.table = {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": "",
-            "5": "",
-            "6": "",
-            "7": "",
-            "8": "",
-            "9": "",
-        }
-
-    def __repr__(self) -> str:
-        return f"Tic_Tac_Toe(player_avatar={self.player_avatar}, player={self.player.__repr__()}, opponent={self.opponent.__repr__()}, first={self.first}, turn={self.turn_},table={self.table})"
-
-    def __str__(self) -> str:
-        return f"the player's avatar will be {self.player_avatar}\nplayer will be {self.player}\nopponent will be {self.opponent}\n {self.player if self.first else self.opponent}\n {self.table} will be playing field"
+    xo: ClassVar[tuple] = ("X", "O")
+    player_avatar: str = rd.choice(xo)
+    player: PlayerA = PlayerA(self, player_avatar, "player")
+    opponent: PlayerB = (
+        PlayerB(self, "O", "opponent")
+        if player_avatar == "X"
+        else PlayerB(self, "X", "opponent")
+    )
+    first: str = rd.choice(xo)
+    turn_: str = player.name if first == player.player else opponent.name
+    table: dict[str, str] = {
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": "",
+        "7": "",
+        "8": "",
+        "9": "",
+    }
 
     def get_cell(self, cell: str) -> str | None:
         return self.table.get(cell)
@@ -198,12 +192,12 @@ class Tic_Tac_Toe:
 
 class Decision_Tree:
     def __init__(self, root_node: Tic_Tac_Toe) -> None:
-        self.decision_tree:dict = {}
+        self.decision_tree: dict[int, Tic_Tac_Toe | dict[int, Tic_Tac_Toe]] = {}
         self.tree_row = 0
         if len(self.decision_tree) == 0:
             self.update_decision_tree(root_node)
 
-    def update_decision_tree(self, branches: list | Tic_Tac_Toe):
+    def update_decision_tree(self, branches: dict[int, Tic_Tac_Toe] | Tic_Tac_Toe):
         if isinstance(branches, dict):
             self.add_tree_row()
         self.decision_tree.update({self.tree_row: branches})
@@ -214,10 +208,25 @@ class Decision_Tree:
     def update_branch_score(self):
         return
 
-    def find_branch(self, branch:Tic_Tac_Toe):
-        for branch_no, decision_tree_branch in self.decision_tree.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
-            if decision_tree_branch == branch:
-                return branch_no
+    def find_branch(self, branch: Tic_Tac_Toe):
+        # print(self.decision_tree)
+        for (
+            tree_row_no,
+            decision_tree_row,
+        ) in (
+            self.decision_tree.items()
+        ):  # for name, age in dictionary.iteritems():  (for Python 2.x)
+            #     print(branch_no, decision_tree_row)
+            if isinstance(decision_tree_row, Tic_Tac_Toe):
+                continue
+            for (
+                decision_tree_branch_no,
+                decision_tree_branch,
+            ) in decision_tree_row.items():
+                print(decision_tree_branch.__eq__(branch))
+                if decision_tree_branch.__eq__(branch):
+                    return (tree_row_no, decision_tree_branch_no)
+
 
 def minimax(
     game: Tic_Tac_Toe,
@@ -225,7 +234,7 @@ def minimax(
     decision_tree: Decision_Tree | None = None,
     branch_no: int = 0,
 ):
-    # TODO if we score change decision tree 
+    # TODO if we score change decision tree
     if decision_tree is None:
         decision_tree = Decision_Tree(game)
 
@@ -259,8 +268,7 @@ def minimax(
                     player_row.update({branch_no_: game_copy})
                 else:
                     player_row.update({branch_no: game_copy})
-            game_copy.format()
-            
+            # game_copy.format()
 
     if game.turn_ == game.opponent.name:
         decision_tree.update_decision_tree(opponent_row)
@@ -268,15 +276,14 @@ def minimax(
             score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
             if score:
                 find_branch_decision = decision_tree.find_branch(branch)
-                print(game.turn_)
-                print(find_branch_decision)
-                print(score)
+                # print(find_branch_decision)
+                # print(decision_tree.decision_tree.get(find_branch_decision[0]))
+
     else:
         decision_tree.update_decision_tree(player_row)
         for branch_no, branch in player_row.items():
             score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
             if score:
                 find_branch_decision = decision_tree.find_branch(branch)
-                print(game.turn_)
-                print(find_branch_decision)
-                print(score)
+                # print(find_branch_decision)
+                # print(decision_tree.decision_tree.get(find_branch_decision[0]))
