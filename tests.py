@@ -1,10 +1,11 @@
 import copy as cp
-from back import Tic_Tac_Toe, Decision_Tree
+import unittest
+from back import TicTacToe, DecisionTree
 
 
-def test_win_met():
+def test_win_lose_met():
     # initialize
-    game = Tic_Tac_Toe()
+    game = TicTacToe()
 
     try:
         # test rows
@@ -80,16 +81,20 @@ def test_win_met():
 
 def test_find_branch_decision_tree():
     # initialization
-    game = Tic_Tac_Toe()
+    game = TicTacToe()
+    tree_row: dict[str, TicTacToe] = {}
+    branch_no = 0
     game.set_cell(**{"1": game.player.player, "2": game.player.player})
     game.turn(game.player.name)
-    decision_tree = Decision_Tree(game)
-    for branch in range(3, 6):
-            game_cp = cp.deepcopy(game)
-            game_cp.set_cell(**{str(branch):game_cp.player.player})
-            decision_tree.update_decision_tree({branch:game_cp})
+    decision_tree = DecisionTree(game)
 
     try:
+        for branch in range(3, 6):
+                game_cp = cp.deepcopy(game)
+                game_cp.set_cell(**{str(branch):game_cp.player.player})
+                branch_no += 1
+                tree_row.update({branch_no: game_cp})
+        decision_tree.update_decision_tree(tree_row)
         branch = cp.deepcopy(game)
         branch.set_cell(**{"1": branch.player.player, "2": branch.player.player, "5": branch.player.player})
         found_branch = decision_tree.find_branch(branch)
@@ -97,7 +102,34 @@ def test_find_branch_decision_tree():
     except Exception as exc:
         print(exc)
 
+def test_update_branch_score():
+    # initialization
+    game = TicTacToe()
+    tree_row: dict[str, TicTacToe] = {}
+    branch_no = 0
+    game.set_cell(**{"1": game.player.player, "2": game.player.player})
+    game.turn(game.player.name)
+    decision_tree = DecisionTree(game)
+
+    try:
+        for branch in range(3, 6):
+                game_cp = cp.deepcopy(game)
+                game_cp.set_cell(**{str(branch):game_cp.player.player})
+                branch_no += 1
+                tree_row.update({branch_no: game_cp})
+        decision_tree.update_decision_tree(tree_row)
+        branch = cp.deepcopy(game)
+        branch.set_cell(**{"1": branch.player.player, "2": branch.player.player, "5": branch.player.player})
+        found_branch = decision_tree.find_branch(branch)
+    except Exception as exc:
+        print(exc)
+
+class TestTicTacToeWin(unittest.TestCase):
+    def test_win(self):
+        pass
+
 
 if __name__ == "__main__":
     # test_win_met()
-    test_find_branch_decision_tree()
+    # test_find_branch_decision_tree()
+    unittest.main()

@@ -2,14 +2,14 @@
 
 import PySimpleGUI as sg
 
-from back import Tic_Tac_Toe
+from back import TicTacToe
 
 sg.theme("dark grey")
 
 
 def main():
     # BUG buggy when going second
-    game = Tic_Tac_Toe()
+    game = TicTacToe()
 
     layout = [
         [sg.Text(f"You'll be {game.player.player}.")],
@@ -123,7 +123,7 @@ def main():
             break
 
             # if event == "-RETRY-":
-            game = Tic_Tac_Toe()
+            game = TicTacToe()
             window.refresh
 
         # if game.tie():

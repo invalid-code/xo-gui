@@ -3,7 +3,7 @@ import copy as cp
 
 # import PySimpleGUI as sg
 from typing import ClassVar
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 class Player:
@@ -20,7 +20,7 @@ class Player:
 
 
 class PlayerA(Player):
-    def play(self, event: str):
+    def play(self, event: str) -> dict[str, str] | None:
         self.game.turn(self.name)
         ind = event[5]
         if event[1:5] == "CELL":
@@ -29,34 +29,39 @@ class PlayerA(Player):
 
 
 class PlayerB(Player):
-    def play(self):
+    def play(self) -> None:
         self.game.turn(self.name)
         move = minimax(self.game)
 
 
 @dataclass
-class Tic_Tac_Toe:
+class TicTacToe:
     xo: ClassVar[tuple] = ("X", "O")
     player_avatar: str = rd.choice(xo)
-    player: PlayerA = PlayerA(self, player_avatar, "player")
-    opponent: PlayerB = (
-        PlayerB(self, "O", "opponent")
-        if player_avatar == "X"
-        else PlayerB(self, "X", "opponent")
-    )
     first: str = rd.choice(xo)
-    turn_: str = player.name if first == player.player else opponent.name
-    table: dict[str, str] = {
-        "1": "",
-        "2": "",
-        "3": "",
-        "4": "",
-        "5": "",
-        "6": "",
-        "7": "",
-        "8": "",
-        "9": "",
-    }
+    table: dict[str, str] = field(
+        default_factory=lambda: {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "6": "",
+            "7": "",
+            "8": "",
+            "9": "",
+        }
+    )
+    def __post_init__(self):
+        self.player = PlayerA(self, self.player_avatar, "player")
+        self.opponent = (
+            PlayerB(self, "O", "opponent")
+            if self.player_avatar == "X"
+            else PlayerB(self, "X", "opponent")
+        )
+        self.turn_ = (
+            self.player.name if self.first == self.player.player else self.opponent.name
+        )
 
     def get_cell(self, cell: str) -> str | None:
         return self.table.get(cell)
@@ -92,12 +97,12 @@ class Tic_Tac_Toe:
 
     def cell(self, ind: str) -> bool:
         """check if cell is already taken"""
-        return self.table.get(ind) not in Tic_Tac_Toe.xo
+        return self.table.get(ind) not in TicTacToe.xo
 
     def tie(self) -> bool:
         """To check if all cells are filled"""
         for cell in self.table.values():
-            if cell not in Tic_Tac_Toe.xo:  # if a cell is empty return false
+            if cell not in TicTacToe.xo:  # if a cell is empty return false
                 return False
         return True
 
@@ -190,14 +195,14 @@ class Tic_Tac_Toe:
         )
 
 
-class Decision_Tree:
-    def __init__(self, root_node: Tic_Tac_Toe) -> None:
-        self.decision_tree: dict[int, Tic_Tac_Toe | dict[int, Tic_Tac_Toe]] = {}
+class DecisionTree:
+    def __init__(self, root_node: TicTacToe) -> None:
+        self.decision_tree: dict[int, TicTacToe | dict[int, TicTacToe]] = {}
         self.tree_row = 0
         if len(self.decision_tree) == 0:
             self.update_decision_tree(root_node)
 
-    def update_decision_tree(self, branches: dict[int, Tic_Tac_Toe] | Tic_Tac_Toe):
+    def update_decision_tree(self, branches: dict[int, TicTacToe] | TicTacToe) -> None:
         if isinstance(branches, dict):
             self.add_tree_row()
         self.decision_tree.update({self.tree_row: branches})
@@ -205,10 +210,13 @@ class Decision_Tree:
     def add_tree_row(self):
         self.tree_row += 1
 
-    def update_branch_score(self):
-        return
+    def update_branch_score(self, coordinates: tuple[int, int], score:int) -> None:
+        tree_row = self.decision_tree.get(coordinates[0])
+        branch = tree_row.get(coordinates[1])
+        node = {"game": branch, "score": score}
+        tree_row.update({coordinates[1]: node})
 
-    def find_branch(self, branch: Tic_Tac_Toe):
+    def find_branch(self, branch: TicTacToe) -> tuple[int, int] | None:
         # print(self.decision_tree)
         for (
             tree_row_no,
@@ -217,26 +225,25 @@ class Decision_Tree:
             self.decision_tree.items()
         ):  # for name, age in dictionary.iteritems():  (for Python 2.x)
             #     print(branch_no, decision_tree_row)
-            if isinstance(decision_tree_row, Tic_Tac_Toe):
+            if isinstance(decision_tree_row, TicTacToe):
                 continue
             for (
                 decision_tree_branch_no,
                 decision_tree_branch,
             ) in decision_tree_row.items():
-                print(decision_tree_branch.__eq__(branch))
                 if decision_tree_branch.__eq__(branch):
                     return (tree_row_no, decision_tree_branch_no)
 
 
 def minimax(
-    game: Tic_Tac_Toe,
+    game: TicTacToe,
     depth=0,
-    decision_tree: Decision_Tree | None = None,
+    decision_tree: DecisionTree | None = None,
     branch_no: int = 0,
 ):
     # TODO if we score change decision tree
     if decision_tree is None:
-        decision_tree = Decision_Tree(game)
+        decision_tree = DecisionTree(game)
 
     if game.win():
         return 1
@@ -245,8 +252,8 @@ def minimax(
     elif game.tie():
         return 0
 
-    opponent_row: dict[int, Tic_Tac_Toe] = {}
-    player_row: dict[int, Tic_Tac_Toe] = {}
+    opponent_row: dict[int, TicTacToe] = {}
+    player_row: dict[int, TicTacToe] = {}
     branch_no_ = 0
 
     for key in game.table.keys():
@@ -276,8 +283,6 @@ def minimax(
             score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
             if score:
                 find_branch_decision = decision_tree.find_branch(branch)
-                # print(find_branch_decision)
-                # print(decision_tree.decision_tree.get(find_branch_decision[0]))
 
     else:
         decision_tree.update_decision_tree(player_row)
@@ -285,5 +290,3 @@ def minimax(
             score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
             if score:
                 find_branch_decision = decision_tree.find_branch(branch)
-                # print(find_branch_decision)
-                # print(decision_tree.decision_tree.get(find_branch_decision[0]))
