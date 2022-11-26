@@ -52,6 +52,7 @@ class TicTacToe:
             "9": "",
         }
     )
+
     def __post_init__(self):
         self.player = PlayerA(self, self.player_avatar, "player")
         self.opponent = (
@@ -210,7 +211,7 @@ class DecisionTree:
     def add_tree_row(self):
         self.tree_row += 1
 
-    def update_branch_score(self, coordinates: tuple[int, int], score:int) -> None:
+    def update_branch_score(self, coordinates: tuple[int, int], score: int) -> None:
         tree_row = self.decision_tree.get(coordinates[0])
         branch = tree_row.get(coordinates[1])
         node = {"game": branch, "score": score}
