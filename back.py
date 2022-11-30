@@ -64,6 +64,13 @@ class TicTacToe:
             self.player.name if self.first == self.player.player else self.opponent.name
         )
 
+    def __str__(self) -> str:
+        return f"""{self.table.get('1') if self.table.get('1') else ' ' }|{self.table.get('2') if self.table.get('2') else ' ' }|{self.table.get('3') if self.table.get('3') else ' ' }
+- - -
+{self.table.get('4') if self.table.get('4') else ' ' }|{self.table.get('5') if self.table.get('5') else ' ' }|{self.table.get('6') if self.table.get('6') else ' ' }
+- - -
+{self.table.get('7') if self.table.get('7') else ' ' }|{self.table.get('8') if self.table.get('8') else ' ' }|{self.table.get('9') if self.table.get('9') else ' ' }"""
+
     def get_cell(self, cell: str) -> str | None:
         return self.table.get(cell)
 
@@ -203,6 +210,9 @@ class DecisionTree:
         if len(self.decision_tree) == 0:
             self.update_decision_tree(root_node)
 
+    def __repr__(self) -> str:
+        return f"DecisionTree(decision_tree='{self.decision_tree}', tree_row='{self.tree_row}')"
+
     def update_decision_tree(self, branches: dict[int, TicTacToe] | TicTacToe) -> None:
         if isinstance(branches, dict):
             self.add_tree_row()
@@ -212,13 +222,30 @@ class DecisionTree:
         self.tree_row += 1
 
     def update_branch_score(self, coordinates: tuple[int, int], score: int) -> None:
+        """mutate branch score
+
+        Args:
+            coordinates (tuple[int, int]): to find where branch is located
+            score (int): score to give the branch
+        """
         tree_row = self.decision_tree.get(coordinates[0])
         branch = tree_row.get(coordinates[1])
         node = {"game": branch, "score": score}
         tree_row.update({coordinates[1]: node})
 
-    def find_branch(self, branch: TicTacToe) -> tuple[int, int] | None:
-        # print(self.decision_tree)
+    def find_branch(
+        self,
+        branch: TicTacToe,
+    ) -> tuple[int, int] | None:
+        """find a branch in the decision tree
+
+        Args:
+            branch (TicTacToe): branch to find
+            coordinates (tuple[int,int]): coodinates of a branch
+
+        Returns:
+            tuple[int, int] | None: coordinates of the branch if it exist's
+        """
         for (
             tree_row_no,
             decision_tree_row,
@@ -236,20 +263,30 @@ class DecisionTree:
                     return (tree_row_no, decision_tree_branch_no)
 
 
+def best_move(decision_tree: DecisionTree):
+    """_summary_
+
+    Args:
+        decision_tree (DecisionTree): _description_
+    """
+    pass
+
+
 def minimax(
     game: TicTacToe,
     depth=0,
     decision_tree: DecisionTree | None = None,
     branch_no: int = 0,
 ):
-    # TODO if we score change decision tree
+    # TODO: go backwards to the decision tree and give score
+
     if decision_tree is None:
         decision_tree = DecisionTree(game)
 
     if game.win():
-        return 1
+        return 0
     elif game.lose():
-        return -1
+        return 1
     elif game.tie():
         return 0
 
@@ -282,12 +319,57 @@ def minimax(
         decision_tree.update_decision_tree(opponent_row)
         for branch_no, branch in opponent_row.items():
             score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
-            if score:
-                find_branch_decision = decision_tree.find_branch(branch)
-
+            if score is not None:
+                find_branch_decision_tree = decision_tree.find_branch(branch)
+                decision_tree.update_branch_score(
+                    find_branch_decision_tree, score
+                )  # terminal node
+                for parent_tree_row_no in range(
+                    find_branch_decision_tree[0] - 1, 0, -1
+                ):
+                    parent_branch = decision_tree.decision_tree.get(
+                        parent_tree_row_no
+                    ).get(find_branch_decision_tree[1])
+                    if parent_branch.turn_ == game.opponent.name:
+                        if score is 1:
+                            decision_tree.update_branch_score(
+                                (parent_tree_row_no, find_branch_decision_tree[1]),
+                                score,
+                            )
+                    else:
+                        if score is -1:
+                            decision_tree.update_branch_score(
+                                (parent_tree_row_no, find_branch_decision_tree[1]),
+                                score,
+                            )
     else:
         decision_tree.update_decision_tree(player_row)
         for branch_no, branch in player_row.items():
             score = minimax(branch, decision_tree=decision_tree, branch_no=branch_no)
-            if score:
-                find_branch_decision = decision_tree.find_branch(branch)
+            if score is not None:
+                find_branch_decision_tree = decision_tree.find_branch(branch)
+                decision_tree.update_branch_score(
+                    find_branch_decision_tree, score
+                )  # terminal node
+                for parent_tree_row_no in range(
+                    find_branch_decision_tree[0] - 1, 0, -1
+                ):
+                    # decision_tree.get(parent_tree_row_no).get(find_branch_decision_tree[1])
+                    # decision_tree.update_branch_score(
+                    #     (parent_tree_row_no, find_branch_decision_tree[1]), score
+                    # )
+                    parent_branch = decision_tree.decision_tree.get(
+                        parent_tree_row_no
+                    ).get(find_branch_decision_tree[1])
+                    if parent_branch.turn_ == game.opponent.name:
+                        if score is 1:
+                            decision_tree.update_branch_score(
+                                (parent_tree_row_no, find_branch_decision_tree[1]),
+                                score,
+                            )
+                    else:
+                        if score is -1:
+                            decision_tree.update_branch_score(
+                                (parent_tree_row_no, find_branch_decision_tree[1]),
+                                score,
+                            )
