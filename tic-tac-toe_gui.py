@@ -2,10 +2,9 @@
 
 import PySimpleGUI as sg
 
-from back import TicTacToe
+from Tic_Tac_Toe.game import TicTacToe
 
 sg.theme("dark grey")
-
 
 def main():
     # BUG buggy when going second
@@ -126,16 +125,13 @@ def main():
             game = TicTacToe()
             window.refresh
 
-        # if game.tie():
-        #     window["-POPUP-"].update("Tie")
-        #     window["-RETRY-"].update(visible=True)
         tie = game.tie
         win = game.win
         lose = game.lose
 
         if game.first_mover():
 
-            player_play: dict = game.player.play(event)
+            player_play = game.player.play(event)
             if player_play:
                 window[player_play.get("cell")].update(game.player.player)
 
