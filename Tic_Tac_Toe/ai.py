@@ -1,83 +1,83 @@
 import copy as cp
+from treelib import Tree
+from .game import TicTacToe
+from .players import Player
 
 
-class DecisionTree:
-    def __init__(self, root_node):
-        self.decision_tree: list[list] = []
-        if len(self.decision_tree) == 0:
-            self.update_decision_tree([root_node])
+class DecisionTree(Tree):
+    """tree to store game states"""
 
-    def __repr__(self) -> str:
-        return f"DecisionTree(decision_tree='{self.decision_tree}')"
+    def __init__(self, root_node: TicTacToe, name: str, tag: str):
+        super().__init__()
+        self.create_node(name, tag, data=root_node)
 
-    def __str__(self):
-        from pprint import pformat
-
-        return pformat(vars(self), indent=4, width=1)
-
-    def update_decision_tree(
-        self, branches: list, parent_branch: tuple[int, int] | None = None
-    ):
-        # if parent_branch is None:
-        # return None
-        self.decision_tree.append(branches)
-        # self.decision_tree.append([branches])
-
-    def update_branch_score(self, coordinates: tuple[int, int], score: int):
+    def update_branch_score(self, tag: str, score: int) -> None:
         """update branch score
 
         Args:
-            coordinates (tuple[int, int]): to find where branch is located
+            tag (str): tag identifier to search for branch
             score (int): score to give the branch
         """
-        pass
+        # print(self.update_node(tag))
+        self.get_node(tag).data.update_ai_score(score)
 
 
 def best_move(decision_tree: DecisionTree):
     """_summary_
 
     Args:
-        decision_tree (DecisionTree): _description_
+         decision_tree (DecisionTree): _description_
     """
-    pass
 
 
 def minimax(
-    game,
+    game: TicTacToe,
+    decision_tree: DecisionTree | None = None,
+    name="Root node",
+    tag="root_node",
     depth=0,
-):
-    # TODO: go backwards to the decision tree and give score
-    # * no recursion implementation of minimax alg
+) -> int | None:
 
-    next_row = []
-    decision_tree = DecisionTree(game)
+    if not decision_tree:
+        decision_tree = DecisionTree(game, name=name, tag=tag)
 
-    for row_i, row in enumerate(decision_tree.decision_tree):
-        for branch_i, branch in enumerate(row):
-            if branch.win():
-                # decision_tree.update_branch_score((row_i, branch_i), 1)
-                break
-            elif branch.lose():
-                # decision_tree.update_branch_score((row_i, branch_i), -1)
-                break
-            elif branch.tie():
-                # decision_tree.update_branch_score((row_i, branch_i), 0)
-                break
-            for i, cell in enumerate(branch.table):
-                if branch.cell(i):
-                    game_branch = cp.deepcopy(branch)
-                    game_branch.set_cell(
-                        [
-                            (
-                                i,
-                                game_branch.opponent.player
-                                if branch.turn_ == branch.opponent.name
-                                else game_branch.player.player,
-                            )
-                        ]
-                    )
-                    game_branch.turn()
-                    next_row.append(game_branch)
-            decision_tree.update_decision_tree(next_row, (row_i, branch_i))
-            next_row = []
-    print(decision_tree)
+    if game.win():
+        decision_tree.update_branch_score(tag, 1)
+        return 1
+    if game.lose():
+        decision_tree.update_branch_score(tag, -1)
+        return -1
+    if game.tie():
+        decision_tree.update_branch_score(tag, 0)
+        return 0
+
+    branch_score: list[int] = []
+
+    for branch_i, remaining_cell_i in enumerate(game.remaining_cells()):
+        branch = cp.deepcopy(game)
+        branch_name = (
+            f"Branch {branch_i}" if name == "Root node" else name + f"-{branch_i}"
+        )
+        branch_tag = (
+            f"branch-{branch_i}" if name == "Root node" else tag + f"-{branch_i}"
+        )
+        branch.set_cell(
+            [
+                (
+                    remaining_cell_i,
+                    Player.xo[0] if game.turn_ == "opponent" else Player.xo[1],
+                )
+            ]
+        )
+        branch.turn()
+        # branch.game_state()
+        decision_tree.create_node(branch_name, branch_tag, data=branch, parent=tag)
+        move = minimax(
+            branch, decision_tree=decision_tree, name=branch_name, tag=branch_tag
+        )
+        if move:
+            branch_score.append(move)
+    decision_tree.show(data_property="ai_score")
+    score = max(branch_score) if game.turn_ == "player" else min(branch_score)
+    decision_tree.update_branch_score(tag, score)
+    return score

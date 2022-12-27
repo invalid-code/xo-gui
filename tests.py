@@ -1,40 +1,105 @@
-import copy as cp
+# pylint: disable=C0114
+# pylint: disable=C0115
+# import copy as cp
 import unittest
 
-from Tic_Tac_Toe.ai import DecisionTree
+# from Tic_Tac_Toe.ai import DecisionTree
 from Tic_Tac_Toe.game import TicTacToe
+from Tic_Tac_Toe.players import PlayerA, PlayerB  # , Player
+
+# from Tic_Tac_Toe.ai import DecisionTree, Node
 
 
 class TestTicTacToeWin(unittest.TestCase):
-    def test_win_player(self):
-        # * player = X
-        game = TicTacToe()
+    def test_win_player_horizontal(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
         for cell in range(9):
-            # game.table[cell] = TicTacToe.xo[0]
-            game.set_cell([(cell, TicTacToe.xo[0])])
+            game.set_cell([(cell, game.player.player)])
             if cell in (2, 5, 8):
                 self.assertTrue(game.win())
-                game = TicTacToe()
+                game = TicTacToe(player=player, opponent=opponent)
 
-        game = TicTacToe()
-        for cell in range(0, 9, 3):
-            game.set_cell([(cell, TicTacToe.xo[0])])
-            if cell in (6, 7, 8):
-                self.assertTrue(game.win())
-                game = TicTacToe()
+    def test_win_player_vertical(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
+        for i in range(3):
+            for cell in range(i, 9, 3):
+                game.set_cell([(cell, game.player.player)])
+                if cell in (6, 7, 8):
+                    self.assertTrue(game.win())
+                    game = TicTacToe(player=player, opponent=opponent)
 
-        game = TicTacToe()
+    def test_win_player_diagonal(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
         for cell in range(0, 9, 4):
-            game.set_cell([(cell, TicTacToe.xo[0])])
+            game.set_cell([(cell, game.player.player)])
             if cell == 8:
                 self.assertTrue(game.win())
-                game = TicTacToe()
+                game = TicTacToe(player=player, opponent=opponent)
 
         for cell in range(3, 8, 2):
-            game.set_cell([(cell, TicTacToe.xo[0])])
+            game.set_cell([(cell, game.player.player)])
             if cell == 6:
-                self.assertTrue(game.win())
-                game = TicTacToe()
+                self.assertEqual(game.win())
+                game = TicTacToe(player=player, opponent=opponent)
+
+
+class TestTicTacToeLose(unittest.TestCase):
+    def test_lose_player_horizontal(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
+        for cell in range(9):
+            game.set_cell([(cell, game.opponent.opponent)])
+            if cell in (2, 5, 8):
+                self.assertTrue(game.lose())
+                game = TicTacToe(player=player, opponent=opponent)
+
+    def test_lose_player_vertical(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
+        for i in range(3):
+            for cell in range(i, 9, 3):
+                game.set_cell([(cell, game.opponent.opponent)])
+                if cell in (6, 7, 8):
+                    self.assertTrue(game.lose())
+                    game = TicTacToe(player=player, opponent=opponent)
+
+    def test_lose_player_diagonal(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
+        for cell in range(0, 9, 4):
+            game.set_cell([(cell, game.opponent.opponent)])
+            if cell == 8:
+                self.assertTrue(game.lose())
+                game = TicTacToe(player=player, opponent=opponent)
+
+        for cell in range(3, 8, 2):
+            game.set_cell([(cell, game.opponent.opponent)])
+            if cell == 6:
+                self.assertEqual(game.lose())
+                game = TicTacToe(player=player, opponent=opponent)
+
+
+class TestTicTacToeTie(unittest.TestCase):
+    def test_tie(self):
+        player = PlayerA()
+        opponent = PlayerB()
+        game = TicTacToe(player=player, opponent=opponent)
+        for cell in range(9):
+            game.set_cell([(cell, game.player.player)])
+        self.assertTrue(game.tie())
+        game = TicTacToe(player=player, opponent=opponent)
+        for cell in range(9):
+            game.set_cell([(cell, game.opponent.opponent)])
+        self.assertTrue(game.tie())
 
 
 if __name__ == "__main__":

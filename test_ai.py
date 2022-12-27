@@ -1,33 +1,35 @@
 from Tic_Tac_Toe.game import TicTacToe
+from Tic_Tac_Toe.players import PlayerA, PlayerB, Player
+from Tic_Tac_Toe.ai import minimax
 
 
 def test():
     # inialization
-    game = TicTacToe()
-    game.opponent.player = TicTacToe.xo[0]
-    game.player.player = TicTacToe.xo[1]
+    game = TicTacToe(player=PlayerA(), opponent=PlayerB())
+    game.player.player = Player.xo[0]
+    game.opponent.opponent = Player.xo[1]
     game.set_cell(
         [
-            (0, TicTacToe.xo[0]),
-            (2, TicTacToe.xo[1]),
-            (3, TicTacToe.xo[0]),
-            (5, TicTacToe.xo[0]),
-            (6, TicTacToe.xo[1]),
-            (7, TicTacToe.xo[1]),
+            (0, game.player.player),
+            (2, game.opponent.opponent),
+            (3, game.player.player),
+            (5, game.player.player),
+            (6, game.opponent.opponent),
+            (7, game.opponent.opponent),
         ]
     )
-    game.turn_ = game.opponent.name
-    # game.turn(game.opponent.name)
+    game.turn(game.opponent.name)
     # inialization done
 
     # test inialization
     print("player: ", game.player.player)
-    print("opponent: ", game.opponent.player)
-    game.format()
+    print("opponent: ", game.opponent.opponent)
+    game.game_state()
     print("-----------------------------------")
 
     # testing ai
-    game.opponent.play()
+    minimax(game)
+    # opponent.play()
 
 
 if __name__ == "__main__":

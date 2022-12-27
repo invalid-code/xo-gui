@@ -1,18 +1,20 @@
 import random as rd
 from dataclasses import dataclass, field
-from typing import ClassVar, Literal
 
-from Tic_Tac_Toe.players import PlayerA, PlayerB
+from .players import Player, PlayerA, PlayerB
 
 
 @dataclass
 class TicTacToe:
-    xo: ClassVar[tuple] = ("X", "O")
-    player: PlayerA = field(init=False)
-    opponent: PlayerB = field(init=False)
-    turn_: str = field(init=False)
-    player_avatar: Literal["X", "O"] = rd.choice(xo)
-    first: Literal["X", "O"] = rd.choice(xo)
+    """My implemented version of the tic-tac-toe or x's and o's game"""
+
+    # pylint: disable=C0116
+
+    player: PlayerA
+    opponent: PlayerB
+    ai_score: int = 0
+    first: str = rd.choice(Player.names)
+    turn_: str = first
     table: list[int | str] = field(
         default_factory=lambda: [
             1,
@@ -27,21 +29,44 @@ class TicTacToe:
         ]
     )
 
-    def __post_init__(self):
-        self.player = PlayerA(self, self.player_avatar, "player")
-
-        if self.player_avatar == "X":
-            self.opponent = PlayerB(self, "O", "opponent")
-        else:
-            self.opponent = PlayerB(self, "X", "opponent")
-
-        if self.first == self.player.player:
-            self.turn_ = self.player.name
-        else:
-            self.turn_ = self.opponent.name
+    def __hash__(self) -> int:
+        return hash((self.first, self.turn_, tuple(self.table)))
 
     def __str__(self) -> str:
-        return f"{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}"
+        return f"player = {self.player}\
+                opponent = {self.opponent}\
+                first = {self.first}\
+                turn = {self.turn_}\
+                table = \n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n"
+
+    def update_ai_score(self, score) -> None:
+        self.ai_score = score
+
+    def game_state(self) -> None:
+        print(
+            f"\n\
+              {self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\
+              \n- - -\n\
+              {self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\
+              \n- - -\n\
+              {self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\
+              \n"
+        )
+
+    def turn(self, name: str | None = None) -> None:
+        """change turn of game"""
+        if not name:
+            self.turn_ = "player" if self.turn_ == "opponent" else "opponent"
+            return
+        self.turn_ = name
+
+    def remaining_cells(self) -> list[int]:
+        """get indexes of empty cells
+
+        Returns:
+            list[int]: list of empty cell indexes
+        """
+        return [cell_i for cell_i, cell_ in enumerate(self.table) if self.cell(cell_i)]
 
     def cell(self, ind: int) -> bool:
         """check if cell is available
@@ -54,9 +79,8 @@ class TicTacToe:
         """
         return isinstance(self.table[ind], int)
 
-    def get_cell(self, cell_: int, default: str | None = None) -> str:
-        """get current cell value
-
+    def get_cell(self, cell_: int, default: str = " ") -> str:
+        """
         Args:
             cell (int): cell coordinates
 
@@ -69,36 +93,20 @@ class TicTacToe:
             return default
 
     def set_cell(self, coordinates: list[tuple[int, str]]) -> None:
-        """sets the cell value of game"""
-        for cell_ in coordinates:
-            self.table[cell_[0]] = cell_[1]
-
-    def turn(self) -> None:
-        """change turn of game"""
-        if self.turn_ == self.player.name:
-            self.turn_ = self.opponent.name
-        else:
-            self.turn_ = self.player.name
-
-    def format(self) -> None:
-        """log to console the current board state"""
-        print()
-        print(self)
-        print()
+        for cell_i, cell_ in coordinates:
+            self.table[cell_i] = cell_
 
     def first_mover(self) -> str:
-        """return the name of the first player to move
-
+        """
         Returns:
             str: name of the player that moves first
         """
-        if self.first == self.player.player:
-            return self.player.name
+        if self.first == "opponent":
+            return "player"
         else:
-            return self.opponent.name
+            return "opponent"
 
     def tie(self) -> bool:
-        """To check if all cells are filled"""
         for ind, cell in enumerate(self.table):
             if self.cell(ind):
                 # if a cell is empty return false
@@ -152,43 +160,43 @@ class TicTacToe:
     def lose(self) -> bool:
         return (
             (
-                self.get_cell(0) == self.opponent.player
-                and self.get_cell(1) == self.opponent.player
-                and self.get_cell(2) == self.opponent.player
+                self.get_cell(0) == self.opponent.opponent
+                and self.get_cell(1) == self.opponent.opponent
+                and self.get_cell(2) == self.opponent.opponent
             )
             or (
-                self.get_cell(3) == self.opponent.player
-                and self.get_cell(4) == self.opponent.player
-                and self.get_cell(5) == self.opponent.player
+                self.get_cell(3) == self.opponent.opponent
+                and self.get_cell(4) == self.opponent.opponent
+                and self.get_cell(5) == self.opponent.opponent
             )
             or (
-                self.get_cell(6) == self.opponent.player
-                and self.get_cell(7) == self.opponent.player
-                and self.get_cell(8) == self.opponent.player
+                self.get_cell(6) == self.opponent.opponent
+                and self.get_cell(7) == self.opponent.opponent
+                and self.get_cell(8) == self.opponent.opponent
             )
             or (
-                self.get_cell(1) == self.opponent.player
-                and self.get_cell(3) == self.opponent.player
-                and self.get_cell(6) == self.opponent.player
+                self.get_cell(0) == self.opponent.opponent
+                and self.get_cell(3) == self.opponent.opponent
+                and self.get_cell(6) == self.opponent.opponent
             )
             or (
-                self.get_cell(1) == self.opponent.player
-                and self.get_cell(4) == self.opponent.player
-                and self.get_cell(7) == self.opponent.player
+                self.get_cell(1) == self.opponent.opponent
+                and self.get_cell(4) == self.opponent.opponent
+                and self.get_cell(7) == self.opponent.opponent
             )
             or (
-                self.get_cell(2) == self.opponent.player
-                and self.get_cell(5) == self.opponent.player
-                and self.get_cell(8) == self.opponent.player
+                self.get_cell(2) == self.opponent.opponent
+                and self.get_cell(5) == self.opponent.opponent
+                and self.get_cell(8) == self.opponent.opponent
             )
             or (
-                self.get_cell(0) == self.opponent.player
-                and self.get_cell(4) == self.opponent.player
-                and self.get_cell(8) == self.opponent.player
+                self.get_cell(0) == self.opponent.opponent
+                and self.get_cell(4) == self.opponent.opponent
+                and self.get_cell(8) == self.opponent.opponent
             )
             or (
-                self.get_cell(2) == self.opponent.player
-                and self.get_cell(4) == self.opponent.player
-                and self.get_cell(6) == self.opponent.player
+                self.get_cell(2) == self.opponent.opponent
+                and self.get_cell(4) == self.opponent.opponent
+                and self.get_cell(6) == self.opponent.opponent
             )
         )
