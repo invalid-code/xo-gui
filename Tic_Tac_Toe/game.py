@@ -30,27 +30,26 @@ class TicTacToe:
     )
 
     def __hash__(self) -> int:
-        return hash((self.first, self.turn_, tuple(self.table)))
+        return hash(
+            (
+                self.player,
+                self.opponent,
+                self.ai_score,
+                self.first,
+                self.turn_,
+                tuple(self.table),
+            )
+        )
 
     def __str__(self) -> str:
-        return f"player = {self.player}\
-                opponent = {self.opponent}\
-                first = {self.first}\
-                turn = {self.turn_}\
-                table = \n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n"
+        return f"\nplayer = {self.player}\nopponent = {self.opponent}\nai_score = {self.ai_score}\nfirst = {self.first}\nturn = {self.turn_}\ntable = \n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n"
 
     def update_ai_score(self, score) -> None:
         self.ai_score = score
 
     def game_state(self) -> None:
         print(
-            f"\n\
-              {self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\
-              \n- - -\n\
-              {self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\
-              \n- - -\n\
-              {self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\
-              \n"
+            f"\n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n"
         )
 
     def turn(self, name: str | None = None) -> None:

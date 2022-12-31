@@ -1,13 +1,9 @@
 # pylint: disable=C0114
 # pylint: disable=C0115
-# import copy as cp
 import unittest
 
-# from Tic_Tac_Toe.ai import DecisionTree
 from Tic_Tac_Toe.game import TicTacToe
-from Tic_Tac_Toe.players import PlayerA, PlayerB  # , Player
-
-# from Tic_Tac_Toe.ai import DecisionTree, Node
+from Tic_Tac_Toe.players import PlayerA, PlayerB
 
 
 class TestTicTacToeWin(unittest.TestCase):
@@ -42,6 +38,7 @@ class TestTicTacToeWin(unittest.TestCase):
                 self.assertTrue(game.win())
                 game = TicTacToe(player=player, opponent=opponent)
 
+        game = TicTacToe(player=player, opponent=opponent)
         for cell in range(3, 8, 2):
             game.set_cell([(cell, game.player.player)])
             if cell == 6:

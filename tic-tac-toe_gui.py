@@ -3,12 +3,16 @@
 import PySimpleGUI as sg
 
 from Tic_Tac_Toe.game import TicTacToe
+from Tic_Tac_Toe.players import PlayerA, PlayerB
 
 sg.theme("dark grey")
 
+
 def main():
     # BUG buggy when going second
-    game = TicTacToe()
+    player = PlayerA()
+    opponent = PlayerB()
+    game = TicTacToe(player, opponent)
 
     layout = [
         [sg.Text(f"You'll be {game.player.player}.")],
@@ -18,7 +22,7 @@ def main():
                 [
                     [
                         sg.Text(
-                            text=game.table.get("1"),
+                            text=game.get_cell(0, " "),
                             key="-CELL1-",
                             enable_events=True,
                             size=[1, 1],
@@ -27,7 +31,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            text=game.table.get("4"),
+                            text=game.get_cell(3, " "),
                             key="-CELL4-",
                             enable_events=True,
                             size=[1, 1],
@@ -36,7 +40,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            text=game.table.get("7"),
+                            text=game.get_cell(6, " "),
                             key="-CELL7-",
                             enable_events=True,
                             size=[1, 1],
@@ -49,7 +53,7 @@ def main():
                 [
                     [
                         sg.Text(
-                            text=game.table.get("2"),
+                            text=game.get_cell(1, " "),
                             key="-CELL2-",
                             enable_events=True,
                             size=[1, 1],
@@ -58,7 +62,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            text=game.table.get("5"),
+                            text=game.get_cell(4, " "),
                             key="-CELL5-",
                             enable_events=True,
                             size=[1, 1],
@@ -67,7 +71,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            text=game.table.get("8"),
+                            text=game.get_cell(7, " "),
                             key="-CELL8-",
                             enable_events=True,
                             size=[1, 1],
@@ -80,7 +84,7 @@ def main():
                 [
                     [
                         sg.Text(
-                            text=game.table.get("3"),
+                            text=game.get_cell(2, " "),
                             key="-CELL3-",
                             enable_events=True,
                             size=[1, 1],
@@ -89,7 +93,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            text=game.table.get("6"),
+                            text=game.get_cell(5, " "),
                             key="-CELL6-",
                             enable_events=True,
                             size=[1, 1],
@@ -98,7 +102,7 @@ def main():
                     [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                     [
                         sg.Text(
-                            text=game.table.get("9"),
+                            text=game.get_cell(8, " "),
                             key="-CELL9-",
                             enable_events=True,
                             size=[1, 1],
@@ -112,7 +116,7 @@ def main():
     ]
 
     window = sg.Window(
-        title="xo", layout=layout, margins=[25, 25], size=[800, 500], finalize=True
+        title="xo", layout=layout, margins=[25, 25], size=[200, 250], finalize=True
     )
 
     while True:
@@ -121,9 +125,9 @@ def main():
         if event == sg.WIN_CLOSED:
             break
 
-            # if event == "-RETRY-":
-            game = TicTacToe()
-            window.refresh
+        # if event == "-RETRY-":
+        # game = TicTacToe()
+        # window.refresh
 
         tie = game.tie
         win = game.win
@@ -131,55 +135,55 @@ def main():
 
         if game.first_mover():
 
-            player_play = game.player.play(event)
-            if player_play:
-                window[player_play.get("cell")].update(game.player.player)
+            #  pylint: disable=E1121
+            game.player.play(event, game, window)
 
             if win():
                 window["-POPUP-"].update("Win")
-                window["-RETRY-"].update(visible=True)
+                # window["-RETRY-"].update(visible=True)
 
             if lose():
                 window["-POPUP-"].update("Lose")
-                window["-RETRY-"].update(visible=True)
+                # window["-RETRY-"].update(visible=True)
 
             if tie():
                 window["-POPUP-"].update("Tie")
-                window["-RETRY-"].update(visible=True)
+                # window["-RETRY-"].update(visible=True)
 
             game.opponent.play()
 
         else:
 
-            game.opponent.play(game, window)
+            pass
+            # game.opponent.play(game, window)
 
-            if win():
-                window["-POPUP-"].update("Win")
-                window["-RETRY-"].update(visible=True)
+            # if win():
+            #     window["-POPUP-"].update("Win")
+            #     window["-RETRY-"].update(visible=True)
 
-            if lose():
-                window["-POPUP-"].update("Lose")
-                window["-RETRY-"].update(visible=True)
+            # if lose():
+            #     window["-POPUP-"].update("Lose")
+            #     window["-RETRY-"].update(visible=True)
 
-            if tie():
-                window["-POPUP-"].update("Tie")
-                window["-RETRY-"].update(visible=True)
+            # if tie():
+            #     window["-POPUP-"].update("Tie")
+            #     window["-RETRY-"].update(visible=True)
 
-            player_play: dict = game.player.play(game, event)
-            if player_play:
-                window[player_play.get("cell")].update(game.player.player)
+            # player_play: dict = game.player.play(game, event)
+            # if player_play:
+            #     window[player_play.get("cell")].update(game.player.player)
 
         if tie():
             window["-POPUP-"].update("Tie")
-            window["-RETRY-"].update(visible=True)
+            # window["-RETRY-"].update(visible=True)
 
         if win():
             window["-POPUP-"].update("Win")
-            window["-RETRY-"].update(visible=True)
+            # window["-RETRY-"].update(visible=True)
 
         if lose():
             window["-POPUP-"].update("Lose")
-            window["-RETRY-"].update(visible=True)
+            # window["-RETRY-"].update(visible=True)
 
     window.close()
 

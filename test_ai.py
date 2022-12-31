@@ -28,7 +28,8 @@ def test():
     print("-----------------------------------")
 
     # testing ai
-    minimax(game)
+    move = minimax(game)
+    print(move)
     # opponent.play()
 
 
