@@ -1,7 +1,8 @@
+"""game module"""
 import random as rd
 from dataclasses import dataclass, field
 
-from .players import Player, PlayerA, PlayerB
+from .players import Opponent, Player
 
 
 @dataclass
@@ -10,12 +11,12 @@ class TicTacToe:
 
     # pylint: disable=C0116
 
-    player: PlayerA
-    opponent: PlayerB
+    player: Player = Player()
+    opponent: Opponent = Opponent(player)
     ai_score: int = 0
-    first: str = rd.choice(Player.names)
+    first: str = rd.choice((Player.name, Opponent.name))
     turn_: str = first
-    table: list[int | str] = field(
+    table: list[int] = field(
         default_factory=lambda: [
             1,
             2,
@@ -42,7 +43,7 @@ class TicTacToe:
         )
 
     def __str__(self) -> str:
-        return f"\nplayer = {self.player}\nopponent = {self.opponent}\nai_score = {self.ai_score}\nfirst = {self.first}\nturn = {self.turn_}\ntable = \n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n"
+        return f"player: {self.player}\nopponent: {self.opponent}\nai score: {self.ai_score}\nfirst: {self.first}\nturn: {self.turn_}\ntable: \n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n".title()
 
     def update_ai_score(self, score) -> None:
         self.ai_score = score
@@ -55,7 +56,7 @@ class TicTacToe:
     def turn(self, name: str | None = None) -> None:
         """change turn of game"""
         if not name:
-            self.turn_ = "player" if self.turn_ == "opponent" else "opponent"
+            self.turn_ = Player.name if self.turn_ == Opponent.name else Opponent.name
             return
         self.turn_ = name
 
@@ -86,10 +87,7 @@ class TicTacToe:
         Returns:
             str : value of table cell
         """
-        if not self.cell(cell_):
-            return self.table[cell_]
-        else:
-            return default
+        return self.table[cell_] if not self.cell(cell_) else default
 
     def set_cell(self, coordinates: list[tuple[int, str]]) -> None:
         for cell_i, cell_ in coordinates:
@@ -100,13 +98,10 @@ class TicTacToe:
         Returns:
             str: name of the player that moves first
         """
-        if self.first == "opponent":
-            return "player"
-        else:
-            return "opponent"
+        return Player.name if self.first == "opponent" else Opponent.name
 
     def tie(self) -> bool:
-        for ind, cell in enumerate(self.table):
+        for ind, _ in enumerate(self.table):
             if self.cell(ind):
                 # if a cell is empty return false
                 return False

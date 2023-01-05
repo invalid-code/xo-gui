@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 
+import re
+
 import PySimpleGUI as sg
 
 from Tic_Tac_Toe.game import TicTacToe
-from Tic_Tac_Toe.players import PlayerA, PlayerB
+
+# from Tic_Tac_Toe.players import Player, Opponent
 
 sg.theme("dark grey")
 
 
 def main():
     # BUG buggy when going second
-    player = PlayerA()
-    opponent = PlayerB()
-    game = TicTacToe(player, opponent)
+    game = TicTacToe()
 
     layout = [
         [sg.Text(f"You'll be {game.player.player}.")],
@@ -112,7 +113,14 @@ def main():
             ),
         ],
         [sg.Text(key="-POPUP-")],
-        [sg.Button("Retry", k="-RETRY-", visible=False, enable_events=True)],
+        [
+            sg.Button(
+                "Retry",
+                k="-RETRY-",
+                visible=False,
+                enable_events=False,
+            )
+        ],
     ]
 
     window = sg.Window(
@@ -120,7 +128,7 @@ def main():
     )
 
     while True:
-        event, values = window.read()
+        event, _ = window.read()
 
         if event == sg.WIN_CLOSED:
             break
@@ -133,57 +141,58 @@ def main():
         win = game.win
         lose = game.lose
 
-        if game.first_mover():
+        if re.search(r"-CELL[1-9]-", event):
+            if game.first_mover():
 
-            #  pylint: disable=E1121
-            game.player.play(event, game, window)
+                #  pylint: disable=E1121
+                game.player.play(event, game, window)
 
-            if win():
-                window["-POPUP-"].update("Win")
-                # window["-RETRY-"].update(visible=True)
+                if win():
+                    window["-POPUP-"].update("Win")
+                    window["-RETRY-"].update(visible=True)
 
-            if lose():
-                window["-POPUP-"].update("Lose")
-                # window["-RETRY-"].update(visible=True)
+                if lose():
+                    window["-POPUP-"].update("Lose")
+                    window["-RETRY-"].update(visible=True)
+
+                if tie():
+                    window["-POPUP-"].update("Tie")
+                    window["-RETRY-"].update(visible=True)
+
+                game.opponent.play(game, window)
+
+            else:
+
+                pass
+                # game.opponent.play(game, window)
+
+                # if win():
+                #     window["-POPUP-"].update("Win")
+                #     window["-RETRY-"].update(visible=True)
+
+                # if lose():
+                #     window["-POPUP-"].update("Lose")
+                #     window["-RETRY-"].update(visible=True)
+
+                # if tie():
+                #     window["-POPUP-"].update("Tie")
+                #     window["-RETRY-"].update(visible=True)
+
+                # player_play: dict = game.player.play(game, event)
+                # if player_play:
+                #     window[player_play.get("cell")].update(game.player.player)
 
             if tie():
                 window["-POPUP-"].update("Tie")
-                # window["-RETRY-"].update(visible=True)
+                window["-RETRY-"].update(visible=True)
 
-            game.opponent.play()
+            if win():
+                window["-POPUP-"].update("Win")
+                window["-RETRY-"].update(visible=True)
 
-        else:
-
-            pass
-            # game.opponent.play(game, window)
-
-            # if win():
-            #     window["-POPUP-"].update("Win")
-            #     window["-RETRY-"].update(visible=True)
-
-            # if lose():
-            #     window["-POPUP-"].update("Lose")
-            #     window["-RETRY-"].update(visible=True)
-
-            # if tie():
-            #     window["-POPUP-"].update("Tie")
-            #     window["-RETRY-"].update(visible=True)
-
-            # player_play: dict = game.player.play(game, event)
-            # if player_play:
-            #     window[player_play.get("cell")].update(game.player.player)
-
-        if tie():
-            window["-POPUP-"].update("Tie")
-            # window["-RETRY-"].update(visible=True)
-
-        if win():
-            window["-POPUP-"].update("Win")
-            # window["-RETRY-"].update(visible=True)
-
-        if lose():
-            window["-POPUP-"].update("Lose")
-            # window["-RETRY-"].update(visible=True)
+            if lose():
+                window["-POPUP-"].update("Lose")
+                window["-RETRY-"].update(visible=True)
 
     window.close()
 
