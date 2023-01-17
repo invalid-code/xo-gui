@@ -1,21 +1,17 @@
 from Tic_Tac_Toe.game import TicTacToe
-from Tic_Tac_Toe.players import PlayerA, PlayerB, Player
+from Tic_Tac_Toe.players import Player
 from Tic_Tac_Toe.ai import minimax
+import time
 
 
 def test():
     # inialization
-    game = TicTacToe(player=PlayerA(), opponent=PlayerB())
+    game = TicTacToe()
     game.player.player = Player.xo[0]
     game.opponent.opponent = Player.xo[1]
     game.set_cell(
         [
             (0, game.player.player),
-            (2, game.opponent.opponent),
-            (3, game.player.player),
-            (5, game.player.player),
-            (6, game.opponent.opponent),
-            (7, game.opponent.opponent),
         ]
     )
     game.turn(game.opponent.name)
@@ -28,8 +24,11 @@ def test():
     print("-----------------------------------")
 
     # testing ai
+    start = time.perf_counter()
     move = minimax(game)
     print(move)
+    end = time.perf_counter()
+    print(f"Program end: {end - start}")
     # opponent.play()
 
 

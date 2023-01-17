@@ -6,7 +6,6 @@ import PySimpleGUI as sg
 
 from Tic_Tac_Toe.game import TicTacToe
 
-# from Tic_Tac_Toe.players import Player, Opponent
 
 sg.theme("dark grey")
 
@@ -151,15 +150,16 @@ def main():
                     window["-POPUP-"].update("Win")
                     window["-RETRY-"].update(visible=True)
 
-                if lose():
+                elif lose():
                     window["-POPUP-"].update("Lose")
                     window["-RETRY-"].update(visible=True)
 
-                if tie():
+                elif tie():
                     window["-POPUP-"].update("Tie")
                     window["-RETRY-"].update(visible=True)
 
-                game.opponent.play(game, window)
+                else:
+                    game.opponent.play(game, window)
 
             else:
 
