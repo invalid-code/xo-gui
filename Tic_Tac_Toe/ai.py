@@ -30,7 +30,7 @@ def best_move(dt: DecisionTree) -> int:
     Args:
          dt (DecisionTree): decision tree to search new move
     """
-    dt.show(data_property="ai_score")
+    # dt.show()
     root_node = dt.get_node("root_node").data
     moves = root_node.remaining_cells()
     branch_scores = [
@@ -75,40 +75,27 @@ def minimax(
 
     branch_score: list[int] = []
 
-    pl = []
+    for i, cells in enumerate(game.remaining_cells()):
+        branch = cp.deepcopy(game)
+        bn = f"Branch {i}" if name == "Root node" else name + f"-{i}"
+        bt = f"branch-{i}" if name == "Root node" else tag + f"-{i}"
 
-    with ft.ProcessPoolExecutor() as pe:
-        for i, cells in enumerate(game.remaining_cells()):
-            branch = cp.deepcopy(game)
-            bn = f"Branch {i}" if name == "Root node" else name + f"-{i}"
-            bt = f"branch-{i}" if name == "Root node" else tag + f"-{i}"
-
-            branch.set_cell(
-                [
-                    (
-                        cells,
-                        game.opponent.opponent
-                        if game.turn_ == "opponent"
-                        else game.player.player,
-                    )
-                ]
-            )
-            # branch.game_state()
-            branch.turn()
-            dt.create_node(bn, bt, data=branch, parent=tag)
-            if name == "Root node":
-                pl.append(pe.submit(minimax, branch, dt=dt, name=bn, tag=bt))
-            else:
-                move = minimax(branch, dt=dt, name=bn, tag=bt)
-                if move is not None:
-                    branch_score.append(move)
-        if name == "Root node":
-            for f in ft.as_completed(pl):
-                done = f.result()
-                if done is not None:
-                    branch_score.append(done)
-
-    # dt.show()
+        branch.set_cell(
+            [
+                (
+                    cells,
+                    game.opponent.opponent
+                    if game.turn_ == "opponent"
+                    else game.player.player,
+                )
+            ]
+        )
+        branch.turn()
+        # branch.game_state()
+        dt.create_node(bn, bt, data=branch, parent=tag)
+        move = minimax(branch, dt=dt, name=bn, tag=bt)
+        if move is not None:
+            branch_score.append(move)
 
     if name == "Root node":
         return best_move(dt)
