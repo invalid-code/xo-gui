@@ -9,8 +9,6 @@ from .players import Opponent, Player
 class TicTacToe:
     """My implemented version of the tic-tac-toe or x's and o's game"""
 
-    # pylint: disable=C0116
-
     player: Player = Player()
     opponent: Opponent = Opponent(player)
     ai_score: int = 0
@@ -45,6 +43,15 @@ class TicTacToe:
     def __str__(self) -> str:
         return f"player: {self.player}\nopponent: {self.opponent}\nai score: {self.ai_score}\nfirst: {self.first}\nturn: {self.turn_}\ntable: \n{self.get_cell(0, default=' ')}|{self.get_cell(1, default=' ')}|{self.get_cell(2, default=' ')}\n- - -\n{self.get_cell(3, default=' ')}|{self.get_cell(4, default=' ')}|{self.get_cell(5, default=' ')}\n- - -\n{self.get_cell(6, default=' ')}|{self.get_cell(7, default=' ')}|{self.get_cell(8, default=' ')}\n".title()
 
+    def terminal_state(self) -> tuple[bool, int]:
+        if self.win():
+            return (True, -5)
+        if self.lose():
+            return (True, 5)
+        if self.tie():
+            return (True, 0)
+        return (False, -100)
+
     def update_ai_score(self, score) -> None:
         self.ai_score = score
 
@@ -56,7 +63,9 @@ class TicTacToe:
     def turn(self, name: str | None = None) -> None:
         """change turn of game"""
         if not name:
-            self.turn_ = Player.name if self.turn_ == Opponent.name else Opponent.name
+            self.turn_ = (
+                Player.name if self.turn_ == Opponent.name else Opponent.name
+            )
             return
         self.turn_ = name
 
@@ -66,7 +75,11 @@ class TicTacToe:
         Returns:
             list[int]: list of empty cell indexes
         """
-        return [cell_i for cell_i, cell_ in enumerate(self.table) if self.cell(cell_i)]
+        return [
+            cell_i
+            for cell_i, cell_ in enumerate(self.table)
+            if self.cell(cell_i)
+        ]
 
     def cell(self, ind: int) -> bool:
         """check if cell is available

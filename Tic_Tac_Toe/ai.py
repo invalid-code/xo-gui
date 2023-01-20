@@ -1,8 +1,5 @@
 """tic-tac-toe ai"""
 import copy as cp
-import concurrent.futures as ft
-
-# import multiprocessing as mp
 
 from treelib import Tree
 
@@ -28,16 +25,13 @@ def best_move(dt: DecisionTree) -> int:
     """choose the best move from the decision tree
 
     Args:
-         dt (DecisionTree): decision tree to search new move
+         dt (DecisionTree): decision tree to
+          new move
     """
-    # dt.show()
-    root_node = dt.get_node("root_node").data
-    moves = root_node.remaining_cells()
-    branch_scores = [
-        branch.data.ai_score
-        for branch in dt.all_nodes_itr()
-        if branch.identifier != "Root node" and dt.depth(branch) == 1
-    ]
+    root_node = dt.get_node("root_node")
+    branches = dt.children(root_node.identifier)
+    moves = root_node.data.remaining_cells()
+    branch_scores = [branch.data.ai_score for branch in branches]
     best_score = max(branch_scores)
     return moves[branch_scores.index(best_score)]
 
@@ -63,15 +57,10 @@ def minimax(
     if not dt:
         dt = DecisionTree(game, name=name, tag=tag)
 
-    if game.win():
-        dt.update_branch_score(tag, -5)
-        return -5
-    if game.lose():
-        dt.update_branch_score(tag, 5)
-        return 5
-    if game.tie():
-        dt.update_branch_score(tag, 0)
-        return 0
+    terminal_state = game.terminal_state()
+    if terminal_state[0]:
+        dt.update_branch_score(tag, terminal_state[1])
+        return terminal_state[1]
 
     branch_score: list[int] = []
 
@@ -91,7 +80,6 @@ def minimax(
             ]
         )
         branch.turn()
-        # branch.game_state()
         dt.create_node(bn, bt, data=branch, parent=tag)
         move = minimax(branch, dt=dt, name=bn, tag=bt)
         if move is not None:
@@ -99,6 +87,6 @@ def minimax(
 
     if name == "Root node":
         return best_move(dt)
-    score = sum(branch_score)
+    score = min(branch_score) if game.turn_ == "player" else max(branch_score)
     dt.update_branch_score(tag, score)
     return score

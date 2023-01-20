@@ -1,11 +1,8 @@
-# pylint: disable=C0114
-# pylint: disable=C0115
 import unittest
 from Tic_Tac_Toe.game import TicTacToe
 
 
 class TestTicTacToeWin(unittest.TestCase):
-    # pylint: disable=C0116
     def __init__(self):
         super().__init__()
         self.game = TicTacToe()

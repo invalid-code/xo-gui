@@ -123,7 +123,11 @@ def main():
     ]
 
     window = sg.Window(
-        title="xo", layout=layout, margins=[25, 25], size=[200, 250], finalize=True
+        title="xo",
+        layout=layout,
+        margins=[25, 25],
+        size=[200, 250],
+        finalize=True,
     )
 
     while True:
@@ -136,28 +140,23 @@ def main():
         # game = TicTacToe()
         # window.refresh
 
-        tie = game.tie
-        win = game.win
-        lose = game.lose
-
         if re.search(r"-CELL[1-9]-", event):
             if game.first_mover():
 
-                #  pylint: disable=E1121
                 game.player.play(event, game, window)
 
-                if win():
-                    window["-POPUP-"].update("Win")
-                    window["-RETRY-"].update(visible=True)
-
-                elif lose():
-                    window["-POPUP-"].update("Lose")
-                    window["-RETRY-"].update(visible=True)
-
-                elif tie():
-                    window["-POPUP-"].update("Tie")
-                    window["-RETRY-"].update(visible=True)
-
+                terminal_state = game.terminal_state()
+                if terminal_state[0]:
+                    match terminal_state[1]:
+                        case 5:
+                            window["-POPUP-"].update("Win")
+                            window["-RETRY-"].update(visible=True)
+                        case -5:
+                            window["-POPUP-"].update("Lose")
+                            window["-RETRY-"].update(visible=True)
+                        case 0:
+                            window["-POPUP-"].update("Tie")
+                            window["-RETRY-"].update(visible=True)
                 else:
                     game.opponent.play(game, window)
 
@@ -182,17 +181,18 @@ def main():
                 # if player_play:
                 #     window[player_play.get("cell")].update(game.player.player)
 
-            if tie():
-                window["-POPUP-"].update("Tie")
-                window["-RETRY-"].update(visible=True)
-
-            if win():
-                window["-POPUP-"].update("Win")
-                window["-RETRY-"].update(visible=True)
-
-            if lose():
-                window["-POPUP-"].update("Lose")
-                window["-RETRY-"].update(visible=True)
+            terminal_state = game.terminal_state()
+            if terminal_state[0]:
+                match terminal_state[1]:
+                    case 5:
+                        window["-POPUP-"].update("Win")
+                        window["-RETRY-"].update(visible=True)
+                    case -5:
+                        window["-POPUP-"].update("Lose")
+                        window["-RETRY-"].update(visible=True)
+                    case 0:
+                        window["-POPUP-"].update("Tie")
+                        window["-RETRY-"].update(visible=True)
 
     window.close()
 
