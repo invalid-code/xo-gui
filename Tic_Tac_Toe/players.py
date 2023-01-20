@@ -47,3 +47,4 @@ class Opponent:
         move = minimax(game)
         game.set_cell([(move, self.opponent)])
         window[f"-CELL{move + 1}-"].update(self.opponent)
+        window.refresh()

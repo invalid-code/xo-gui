@@ -14,103 +14,108 @@ def main():
     # BUG buggy when going second
     game = TicTacToe()
 
-    layout = [
+    info = [
         [sg.Text(f"You'll be {game.player.player}.")],
         [sg.Text(f"You'll be {'first' if game.first_mover() else 'second'}.")],
-        [
-            sg.Column(
+    ]
+    tic_tac_toe_game = [
+        sg.Column(
+            [
                 [
-                    [
-                        sg.Text(
-                            text=game.get_cell(0, " "),
-                            key="-CELL1-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                    [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [
-                        sg.Text(
-                            text=game.get_cell(3, " "),
-                            key="-CELL4-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                    [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [
-                        sg.Text(
-                            text=game.get_cell(6, " "),
-                            key="-CELL7-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                ]
-            ),
-            sg.VerticalSeparator(p=((0, 0), (1, 1))),
-            sg.Column(
+                    sg.Text(
+                        text=game.get_cell(0, " "),
+                        key="-CELL1-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+                [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                 [
-                    [
-                        sg.Text(
-                            text=game.get_cell(1, " "),
-                            key="-CELL2-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                    [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [
-                        sg.Text(
-                            text=game.get_cell(4, " "),
-                            key="-CELL5-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                    [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [
-                        sg.Text(
-                            text=game.get_cell(7, " "),
-                            key="-CELL8-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                ]
-            ),
-            sg.VerticalSeparator(p=((0, 0), (1, 1))),
-            sg.Column(
+                    sg.Text(
+                        text=game.get_cell(3, " "),
+                        key="-CELL4-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+                [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
                 [
-                    [
-                        sg.Text(
-                            text=game.get_cell(2, " "),
-                            key="-CELL3-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                    [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [
-                        sg.Text(
-                            text=game.get_cell(5, " "),
-                            key="-CELL6-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                    [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
-                    [
-                        sg.Text(
-                            text=game.get_cell(8, " "),
-                            key="-CELL9-",
-                            enable_events=True,
-                            size=[1, 1],
-                        )
-                    ],
-                ]
-            ),
-        ],
+                    sg.Text(
+                        text=game.get_cell(6, " "),
+                        key="-CELL7-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+            ]
+        ),
+        sg.VerticalSeparator(p=((0, 0), (1, 1))),
+        sg.Column(
+            [
+                [
+                    sg.Text(
+                        text=game.get_cell(1, " "),
+                        key="-CELL2-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+                [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
+                [
+                    sg.Text(
+                        text=game.get_cell(4, " "),
+                        key="-CELL5-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+                [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
+                [
+                    sg.Text(
+                        text=game.get_cell(7, " "),
+                        key="-CELL8-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+            ]
+        ),
+        sg.VerticalSeparator(p=((0, 0), (1, 1))),
+        sg.Column(
+            [
+                [
+                    sg.Text(
+                        text=game.get_cell(2, " "),
+                        key="-CELL3-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+                [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
+                [
+                    sg.Text(
+                        text=game.get_cell(5, " "),
+                        key="-CELL6-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+                [sg.HorizontalSeparator(p=((0, 0), (1, 1)))],
+                [
+                    sg.Text(
+                        text=game.get_cell(8, " "),
+                        key="-CELL9-",
+                        enable_events=True,
+                        size=[1, 1],
+                    )
+                ],
+            ]
+        ),
+    ]
+
+    layout = [
+        info,
+        tic_tac_toe_game,
         [sg.Text(key="-POPUP-")],
         [
             sg.Button(
@@ -136,9 +141,14 @@ def main():
         if event == sg.WIN_CLOSED:
             break
 
-        # if event == "-RETRY-":
-        # game = TicTacToe()
-        # window.refresh
+        if event == "-RETRY-":
+            game = TicTacToe()
+            for i in range(1, 10):
+                window[f"-CELL{i}-"].update(game.get_cell(i - 1))
+            window[event].update(visible=False)
+            window["-POPUP-"].update(visible=False)
+            window.refresh()
+            # print(window)
 
         if re.search(r"-CELL[1-9]-", event):
             if game.first_mover():
