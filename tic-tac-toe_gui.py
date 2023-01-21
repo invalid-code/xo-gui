@@ -15,9 +15,15 @@ def main():
     game = TicTacToe()
 
     info = [
-        [sg.Text(f"You'll be {game.player.player}.")],
-        [sg.Text(f"You'll be {'first' if game.first_mover() else 'second'}.")],
+        [sg.Text(f"You'll be {game.player.player}.", k="-XO-")],
+        [
+            sg.Text(
+                f"You'll be {'first' if game.first_mover() == 'player' else 'second'}.",
+                k="-MOVE-",
+            )
+        ],
     ]
+
     tic_tac_toe_game = [
         sg.Column(
             [
@@ -147,8 +153,11 @@ def main():
                 window[f"-CELL{i}-"].update(game.get_cell(i - 1))
             window[event].update(visible=False)
             window["-POPUP-"].update(visible=False)
+            window["-XO-"].update(f"You'll be {game.player.player}.")
+            window["-MOVE-"].update(
+                f"You'll be {'first' if game.first_mover() == 'player' else 'second'}."
+            )
             window.refresh()
-            # print(window)
 
         if re.search(r"-CELL[1-9]-", event):
             if game.first_mover():

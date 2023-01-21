@@ -111,7 +111,7 @@ class TicTacToe:
         Returns:
             str: name of the player that moves first
         """
-        return Player.name if self.first == "opponent" else Opponent.name
+        return Opponent.name if self.first == "opponent" else Player.name
 
     def tie(self) -> bool:
         for ind, _ in enumerate(self.table):
