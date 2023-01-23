@@ -14,6 +14,9 @@ def main():
     # BUG buggy when going second
     game = TicTacToe()
 
+    if game.first_mover() == "opponent":
+        game.opponent.play()
+
     info = [
         [sg.Text(f"You'll be {game.player.player}.", k="-XO-")],
         [
@@ -160,45 +163,23 @@ def main():
             window.refresh()
 
         if re.search(r"-CELL[1-9]-", event):
-            if game.first_mover():
 
-                game.player.play(event, game, window)
+            game.player.play(event, game, window)
 
-                terminal_state = game.terminal_state()
-                if terminal_state[0]:
-                    match terminal_state[1]:
-                        case 5:
-                            window["-POPUP-"].update("Win")
-                            window["-RETRY-"].update(visible=True)
-                        case -5:
-                            window["-POPUP-"].update("Lose")
-                            window["-RETRY-"].update(visible=True)
-                        case 0:
-                            window["-POPUP-"].update("Tie")
-                            window["-RETRY-"].update(visible=True)
-                else:
-                    game.opponent.play(game, window)
-
+            terminal_state = game.terminal_state()
+            if terminal_state[0]:
+                match terminal_state[1]:
+                    case 5:
+                        window["-POPUP-"].update("Win")
+                        window["-RETRY-"].update(visible=True)
+                    case -5:
+                        window["-POPUP-"].update("Lose")
+                        window["-RETRY-"].update(visible=True)
+                    case 0:
+                        window["-POPUP-"].update("Tie")
+                        window["-RETRY-"].update(visible=True)
             else:
-
-                pass
-                # game.opponent.play(game, window)
-
-                # if win():
-                #     window["-POPUP-"].update("Win")
-                #     window["-RETRY-"].update(visible=True)
-
-                # if lose():
-                #     window["-POPUP-"].update("Lose")
-                #     window["-RETRY-"].update(visible=True)
-
-                # if tie():
-                #     window["-POPUP-"].update("Tie")
-                #     window["-RETRY-"].update(visible=True)
-
-                # player_play: dict = game.player.play(game, event)
-                # if player_play:
-                #     window[player_play.get("cell")].update(game.player.player)
+                game.opponent.play(game, window)
 
             terminal_state = game.terminal_state()
             if terminal_state[0]:

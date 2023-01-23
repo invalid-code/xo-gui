@@ -9,11 +9,11 @@ def test():
     game = TicTacToe()
     game.player.player = Player.xo[0]
     game.opponent.opponent = Player.xo[1]
-    # game.set_cell(
-    #     [
-    #         (0, game.player.player),
-    #     ]
-    # )
+    game.set_cell(
+        [
+            (0, game.player.player),
+        ]
+    )
     game.turn(game.opponent.name)
     # inialization done
 
