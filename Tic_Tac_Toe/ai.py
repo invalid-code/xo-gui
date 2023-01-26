@@ -21,6 +21,28 @@ class DecisionTree(Tree):
         self.get_node(tag).data.update_ai_score(score)
 
 
+def calculate_branch(name, tag, game, cells, i, branch_score, dt) -> None:
+    branch = cp.deepcopy(game)
+    bn = f"Branch {i}" if name == "Root node" else name + f"-{i}"
+    bt = f"branch-{i}" if name == "Root node" else tag + f"-{i}"
+
+    branch.set_cell(
+        [
+            (
+                cells,
+                game.opponent.opponent
+                if game.turn_ == "opponent"
+                else game.player.player,
+            )
+        ]
+    )
+    branch.turn()
+    dt.create_node(bn, bt, data=branch, parent=tag)
+    move = minimax(branch, dt=dt, name=bn, tag=bt)
+    if move is not None:
+        branch_score.append(move)
+
+
 def best_move(dt: DecisionTree) -> int:
     """choose the best move from the decision tree
 
@@ -65,25 +87,7 @@ def minimax(
     branch_score: list[int] = []
 
     for i, cells in enumerate(game.remaining_cells()):
-        branch = cp.deepcopy(game)
-        bn = f"Branch {i}" if name == "Root node" else name + f"-{i}"
-        bt = f"branch-{i}" if name == "Root node" else tag + f"-{i}"
-
-        branch.set_cell(
-            [
-                (
-                    cells,
-                    game.opponent.opponent
-                    if game.turn_ == "opponent"
-                    else game.player.player,
-                )
-            ]
-        )
-        branch.turn()
-        dt.create_node(bn, bt, data=branch, parent=tag)
-        move = minimax(branch, dt=dt, name=bn, tag=bt)
-        if move is not None:
-            branch_score.append(move)
+        calculate_branch(name, tag, game, cells, i, branch_score, dt)
 
     if name == "Root node":
         return best_move(dt)
