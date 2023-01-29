@@ -14,8 +14,10 @@ def main():
     # BUG buggy when going second
     game = TicTacToe()
 
+    print(game)
+
     if game.first_mover() == "opponent":
-        game.opponent.play()
+        game.opponent.play(game)
 
     info = [
         [sg.Text(f"You'll be {game.player.player}.", k="-XO-")],

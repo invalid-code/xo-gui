@@ -50,10 +50,12 @@ def best_move(dt: DecisionTree) -> int:
          dt (DecisionTree): decision tree to
           new move
     """
+    # dt.show(data_property="ai_score")
     root_node = dt.get_node("root_node")
     branches = dt.children(root_node.identifier)
     moves = root_node.data.remaining_cells()
     branch_scores = [branch.data.ai_score for branch in branches]
+    print(branch_scores)
     best_score = max(branch_scores)
     return moves[branch_scores.index(best_score)]
 
@@ -63,7 +65,6 @@ def minimax(
     dt: DecisionTree | None = None,
     name="Root node",
     tag="root_node",
-    # depth=0,
 ) -> int:
     """minimax algorithm in python
 

@@ -20,12 +20,13 @@ class Player:
     def __repr__(self) -> str:
         return f"Player(player='{self.player}')"
 
-    def play(self, event: str, game, window: Window) -> None:
+    def play(self, event: str, game, window: Window | None = None) -> None:
         ind = int(event[5])
         game.set_cell([(ind - 1, self.player)])
-        window[event].update(self.player)
-        window.refresh()
         game.turn()
+        if window:
+            window[event].update(self.player)
+            window.refresh()
 
 
 class Opponent:
@@ -43,9 +44,9 @@ class Opponent:
         return f"Opponent(opponent='{self.opponent}')"
 
     def play(self, game, window: Window | None = None) -> int:
-        game.turn()
         move = minimax(game)
         game.set_cell([(move, self.opponent)])
+        game.turn()
         if window:
             window[f"-CELL{move + 1}-"].update(self.opponent)
             window.refresh()

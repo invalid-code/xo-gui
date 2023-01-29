@@ -12,6 +12,10 @@ def test():
     game.set_cell(
         [
             (0, game.player.player),
+            # (1, game.player.player),
+            # (6, game.player.player),
+            # (2, game.opponent.opponent),
+            # (4, game.opponent.opponent),
         ]
     )
     game.turn(game.opponent.name)
