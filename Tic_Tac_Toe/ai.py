@@ -1,7 +1,7 @@
 """tic-tac-toe ai"""
+from treelib import Tree
 import copy as cp
 
-from treelib import Tree
 
 
 class DecisionTree(Tree):
